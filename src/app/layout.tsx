@@ -1,50 +1,68 @@
-import type { Metadata, Viewport } from 'next'
-import './globals.css'
-import CustomCursorWrapper from '@/components/layout/CustomCursorWrapper'
+import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
+import { DM_Sans, JetBrains_Mono, Syne } from 'next/font/google';
+import './globals.css';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import CustomCursorWrapper from '@/components/layout/CustomCursorWrapper';
+import PageProgressBar from '@/components/layout/PageProgressBar';
+import ScrollProgressBar from '@/components/layout/ScrollProgressBar';
+import ToTopButton from '@/components/layout/ToTopButton';
+import { siteConfig } from '@/config/site';
+
+const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans', display: 'swap' });
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
+const syne = Syne({ subsets: ['latin'], variable: '--font-syne', display: 'swap' });
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#050A0E',
-}
+};
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://karimov.dev'),
+  metadataBase: new URL(siteConfig.url),
+  applicationName: siteConfig.siteName,
   title: {
-    default: 'Alisher Karimov | Frontend SWE & Cybersecurity',
-    template: '%s | Alisher Karimov',
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    'Senior Frontend Engineer specializing in secure, high-performance web applications. Next.js, TypeScript, GSAP, and Web Security.',
+  description: siteConfig.description,
+  alternates: {
+    canonical: '/',
+  },
+  category: 'technology',
   keywords: [
-    'frontend engineer',
-    'cybersecurity',
-    'Next.js',
-    'TypeScript',
+    'frontend developer',
     'React',
-    'GSAP',
-    'web security',
-    'OWASP',
+    'TypeScript',
+    'Next.js',
+    'Tailwind CSS',
+    'web development',
+    'UI/UX',
     'Tashkent',
     'Uzbekistan',
   ],
-  authors: [{ name: 'Alisher Karimov', url: 'https://karimov.dev' }],
-  creator: 'Alisher Karimov',
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  manifest: '/manifest.webmanifest',
   openGraph: {
     type: 'website',
-    locale: 'en_US',
-    url: 'https://karimov.dev',
-    siteName: 'Alisher Karimov Portfolio',
-    title: 'Alisher Karimov | Frontend SWE & Cybersecurity',
-    description: 'Building secure, blazing-fast UIs from the ground up.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Alisher Karimov Portfolio' }],
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.siteName,
+    title: siteConfig.title,
+    description: siteConfig.description,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Alisher Karimov | Frontend SWE & Cybersecurity',
-    description: 'Building secure, blazing-fast UIs from the ground up.',
-    images: ['/og-image.png'],
-    creator: '@Alisherkarimov_dev',
+    title: siteConfig.title,
+    description: siteConfig.description,
+    creator: '@ascyber777',
   },
   robots: {
     index: true,
@@ -52,41 +70,70 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, 'max-video-preview': -1, 'max-image-preview': 'large' },
   },
   icons: {
-    icon: [{ url: '/favicon.ico' }, { url: '/icon.svg', type: 'image/svg+xml' }],
-    apple: '/apple-touch-icon.png',
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
   },
-}
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Person',
+        '@id': `${siteConfig.url}/#person`,
+        name: siteConfig.name,
+        url: siteConfig.url,
+        jobTitle: 'Frontend Developer',
+        knowsAbout: ['React', 'Next.js', 'TypeScript', 'Web Accessibility', 'Frontend Development'],
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Tashkent',
+          addressCountry: 'UZ',
+        },
+        sameAs: [siteConfig.github, siteConfig.linkedin, siteConfig.twitter],
+        email: siteConfig.email,
+        telephone: siteConfig.phone,
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${siteConfig.url}/#website`,
+        name: siteConfig.siteName,
+        url: siteConfig.url,
+        description: siteConfig.description,
+        inLanguage: 'en',
+        publisher: { '@id': `${siteConfig.url}/#person` },
+      },
+      {
+        '@type': 'ProfilePage',
+        '@id': `${siteConfig.url}/#webpage`,
+        url: siteConfig.url,
+        name: siteConfig.title,
+        isPartOf: { '@id': `${siteConfig.url}/#website` },
+        mainEntity: { '@id': `${siteConfig.url}/#person` },
+      },
+    ],
+  };
+
   return (
-    <html lang="en" className="scroll-smooth">
+    <html
+      lang="en"
+      className={`${dmSans.variable} ${jetBrainsMono.variable} ${syne.variable} scroll-smooth`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Person',
-              name: 'Alisher Karimov',
-              url: 'https://karimov.dev',
-              jobTitle: 'Senior Frontend Engineer',
-              worksFor: { '@type': 'Organization', name: 'SecureNet Labs' },
-              address: {
-                '@type': 'PostalAddress',
-                addressLocality: 'Tashkent',
-                addressCountry: 'UZ',
-              },
-              sameAs: [
-                'https://github.com/Alisherkarimov',
-                'https://linkedin.com/in/Alisherkarimov',
-              ],
-            }),
+            __html: JSON.stringify(structuredData).replace(/</g, '\\u003c'),
           }}
         />
       </head>
       <body>
+        <Suspense fallback={null}>
+          <PageProgressBar />
+        </Suspense>
+        <ScrollProgressBar />
+        <ToTopButton />
+
         {/* Global custom cursor — renders on ALL pages */}
         <CustomCursorWrapper />
 
@@ -103,7 +150,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
 
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
-  )
+  );
 }

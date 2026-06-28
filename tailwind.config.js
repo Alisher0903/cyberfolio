@@ -8,31 +8,40 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        mono: ['"Space Mono"', 'monospace'],
-        sans: ['Syne', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'monospace'],
+        display: ['var(--font-syne)', 'sans-serif'],
+        body: ['var(--font-dm-sans)', 'sans-serif'],
       },
       colors: {
-        bg: {
-          primary: '#0a0a0f',
-          secondary: '#0d1117',
-          tertiary: '#161b27',
-        },
-        accent: {
-          green: '#00ff88',
-          blue: '#00b8ff',
-          pink: '#ff006e',
-          purple: '#a78bfa',
-        },
+        bg: '#050A0E',
+        surface: '#0A1219',
+        border: '#0E2030',
+        accent: '#00FF87',
+        'accent-dim': '#00CC6A',
+        cyan: '#00D4FF',
+        'cyan-dim': '#0099BB',
+        muted: '#3A5568',
+        'text-primary': '#E8F4FD',
+        'text-secondary': '#7FA8C4',
+        'text-dim': '#3A5568',
+        danger: '#FF3B6B',
+        warning: '#FFB800',
       },
       animation: {
-        'pulse-dot': 'pulseDot 2s infinite',
+        scan: 'scan 4s linear infinite',
+        float: 'float 6s ease-in-out infinite',
         'grid-move': 'gridMove 20s linear infinite',
-        'blink': 'blink 0.8s step-end infinite',
+        blink: 'blink 1s step-end infinite',
+        blob: 'blob 8s ease-in-out infinite',
       },
       keyframes: {
-        pulseDot: {
-          '0%, 100%': { opacity: '1', boxShadow: '0 0 0 0 rgba(0,255,136,0.4)' },
-          '50%': { opacity: '0.7', boxShadow: '0 0 0 6px rgba(0,255,136,0)' },
+        scan: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100vh)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-15px)' },
         },
         gridMove: {
           '0%': { transform: 'translateY(0)' },
@@ -41,6 +50,13 @@ module.exports = {
         blink: {
           '50%': { opacity: '0' },
         },
+        blob: {
+          '0%, 100%': { borderRadius: '60% 40% 30% 70%/60% 30% 70% 40%' },
+          '50%': { borderRadius: '30% 60% 70% 40%/50% 60% 30% 60%' },
+        },
+      },
+      screens: {
+        xs: '375px',
       },
     },
   },

@@ -1,7 +1,8 @@
-'use client'
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { gsap } from 'gsap'
-import Link from 'next/link'
+'use client';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { gsap } from 'gsap';
+import Link from 'next/link';
+import LiveClock from './TimeCost';
 
 const navLinks = [
   { label: 'Home', href: '#hero', icon: '⌂', mobileIcon: '⌂' },
@@ -9,51 +10,51 @@ const navLinks = [
   { label: 'Projects', href: '#projects', icon: '◉', mobileIcon: '◉' },
   { label: 'Skills', href: '#skills', icon: '◆', mobileIcon: '◆' },
   { label: 'Contact', href: '#contact', icon: '✉', mobileIcon: '✉' },
-]
+];
 
 export default function Navbar() {
-  const navRef = useRef<HTMLElement>(null)
-  const [scrolled, setScrolled] = useState(false)
-  const [active, setActive] = useState('Home')
-  const [menuOpen, setMenuOpen] = useState(false)
+  const navRef = useRef<HTMLElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState('Home');
+  const [_menuOpen, setMenuOpen] = useState(false);
 
   // ── Scroll spy ──────────────────────────────────────────────
   const updateActive = useCallback(() => {
-    const ids = ['hero', 'about', 'projects', 'skills', 'contact']
-    let current = 'Home'
+    const ids = ['hero', 'about', 'projects', 'skills', 'contact'];
+    let current = 'Home';
     for (const id of ids) {
-      const el = document.getElementById(id)
-      if (!el) continue
-      const { top } = el.getBoundingClientRect()
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const { top } = el.getBoundingClientRect();
       if (top <= window.innerHeight * 0.45) {
-        current = id.charAt(0).toUpperCase() + id.slice(1)
-        if (id === 'hero') current = 'Home'
+        current = id.charAt(0).toUpperCase() + id.slice(1);
+        if (id === 'hero') current = 'Home';
       }
     }
-    setActive(current)
-  }, [])
+    setActive(current);
+  }, []);
 
   useEffect(() => {
     gsap.fromTo(
       navRef.current,
       { y: -80, opacity: 0 },
       { y: 0, opacity: 1, duration: 1, delay: 0.5, ease: 'power3.out' },
-    )
+    );
     const onScroll = () => {
-      setScrolled(window.scrollY > 50)
-      updateActive()
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    updateActive()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [updateActive])
+      setScrolled(window.scrollY > 50);
+      updateActive();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    updateActive();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [updateActive]);
 
   const scrollTo = (href: string, label: string) => {
-    setActive(label)
-    setMenuOpen(false)
-    const el = document.querySelector(href)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
-  }
+    setActive(label);
+    setMenuOpen(false);
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // ── Desktop nav ─────────────────────────────────────────────
   return (
@@ -71,7 +72,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            aria-label="Alisher Karimov — home"
+            aria-label="Alisher Sodiqov — home"
             className="flex items-center gap-3 group"
           >
             <div className="relative w-8 h-8">
@@ -87,21 +88,20 @@ export default function Navbar() {
                 className="absolute inset-0 flex items-center justify-center font-mono text-xs font-bold"
                 style={{ color: '#00FF87' }}
               >
-                AK
+                AS
               </span>
             </div>
             <span className="font-mono text-sm hidden lg:block" style={{ color: '#7FA8C4' }}>
-              <span style={{ color: '#00FF87' }}>@</span>Alisher.karimov
+              <span style={{ color: '#00FF87' }}>@</span>sodiqoff
             </span>
           </Link>
 
           {/* Links */}
-          <ul className="flex items-center gap-1 list-none" role="menubar">
+          <ul className="flex items-center gap-1 list-none">
             {navLinks.map((link) => (
-              <li key={link.label} role="none">
+              <li key={link.label}>
                 <button
-                  role="menuitem"
-                  aria-current={active === link.label ? 'page' : undefined}
+                  aria-current={active === link.label ? 'location' : undefined}
                   onClick={() => scrollTo(link.href, link.label)}
                   className="relative px-4 py-2 font-mono text-sm transition-all duration-300 rounded"
                   style={{ color: active === link.label ? '#00FF87' : '#7FA8C4' }}
@@ -127,6 +127,7 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div className="flex items-center gap-4">
+            <LiveClock />
             <Link
               href="/resume"
               className="font-mono text-xs px-3 py-1.5 rounded border transition-all duration-300"
@@ -136,43 +137,16 @@ export default function Navbar() {
                 backgroundColor: 'rgba(0,212,255,0.05)',
               }}
               onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                  'rgba(0,212,255,0.12)'
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'rgba(0,212,255,0.12)';
               }}
               onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                  'rgba(0,212,255,0.05)'
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'rgba(0,212,255,0.05)';
               }}
             >
               Resume Builder ↗
             </Link>
-            <div className="flex items-center gap-2">
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ backgroundColor: '#00FF87' }}
-                aria-hidden="true"
-              />
-              <span className="font-mono text-xs" style={{ color: '#7FA8C4' }}>
-                Available
-              </span>
-            </div>
-            <button
-              onClick={() => scrollTo('#contact', 'Contact')}
-              className="px-4 py-2 font-mono text-xs rounded border transition-all duration-300"
-              style={{ borderColor: '#00FF87', color: '#00FF87' }}
-              onMouseEnter={(e) => {
-                const b = e.currentTarget
-                b.style.backgroundColor = '#00FF87'
-                b.style.color = '#050A0E'
-              }}
-              onMouseLeave={(e) => {
-                const b = e.currentTarget
-                b.style.backgroundColor = 'transparent'
-                b.style.color = '#00FF87'
-              }}
-            >
-              Hire Me
-            </button>
           </div>
         </div>
       </nav>
@@ -196,11 +170,11 @@ export default function Navbar() {
               className="absolute inset-0 flex items-center justify-center font-mono text-xs font-bold"
               style={{ color: '#00FF87' }}
             >
-              AK
+              AS
             </span>
           </div>
           <span className="font-mono text-xs" style={{ color: '#7FA8C4' }}>
-            Alisher.karimov
+            <span style={{ color: '#00FF87' }}>@</span>sodiqoff
           </span>
         </Link>
         <Link
@@ -238,14 +212,13 @@ export default function Navbar() {
           ))}
         </div>
 
-        <ul className="flex items-stretch list-none" role="menubar">
+        <ul className="flex items-stretch list-none">
           {navLinks.map((link) => {
-            const isActive = active === link.label
+            const isActive = active === link.label;
             return (
-              <li key={link.label} className="flex-1" role="none">
+              <li key={link.label} className="flex-1">
                 <button
-                  role="menuitem"
-                  aria-current={isActive ? 'page' : undefined}
+                  aria-current={isActive ? 'location' : undefined}
                   onClick={() => scrollTo(link.href, link.label)}
                   className="w-full flex flex-col items-center justify-center gap-1 py-3 transition-all duration-300"
                   style={{ color: isActive ? '#00FF87' : '#3A5568' }}
@@ -279,12 +252,12 @@ export default function Navbar() {
                   )}
                 </button>
               </li>
-            )
+            );
           })}
         </ul>
         {/* iOS home indicator spacer */}
         <div style={{ height: 'env(safe-area-inset-bottom,0px)' }} />
       </nav>
     </>
-  )
+  );
 }

@@ -1,32 +1,76 @@
 {
   "name": "alisherdev",
   "version": "1.0.0",
+  "description": "Frontend Developer portfolio - showcasing projects, skills, and experience",
+  "author": {
+    "name": "Alisher Sodiqov",
+    "email": "info@alisherdev.uz",
+    "url": "https://alisherdev.uz"
+  },
+  "homepage": "https://alisherdev.uz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alisher0903/my-site.git"
+  },
+  "keywords": [
+    "portfolio",
+    "frontend",
+    "developer",
+    "next.js",
+    "react",
+    "typescript",
+    "tailwind"
+  ],
   "private": true,
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.10"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,md,json}\"",
+    "type-check": "tsc --noEmit",
+    "validate": "pnpm format:check && pnpm lint && pnpm type-check"
   },
   "dependencies": {
-    "next": "14.2.5",
+    "@gsap/react": "^2.1.1",
+    "clsx": "^2.1.1",
+    "gsap": "^3.12.5",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "lenis": "^1.1.6",
+    "next": "15.5.19",
     "react": "^18",
     "react-dom": "^18",
-    "gsap": "^3.12.5",
-    "@gsap/react": "^2.1.1",
-    "lenis": "^1.1.6",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^2.4.0",
-    "zustand": "^4.5.4",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
-    "@types/jspdf": "^2.0.0"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@commitlint/config-conventional": "^21.0.2",
+    "@eslint/js": "^9.39.4",
+    "@next/eslint-plugin-next": "15.5.19",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
     "autoprefixer": "^10.0.1",
-    "postcss": "^8",
+    "commitlint": "^21.0.2",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "postcss": "^8.5.10",
+    "prettier": "^3.8.4",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

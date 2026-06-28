@@ -1,45 +1,34 @@
-'use client'
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-
-const codeLines = [
-  { line: '01', code: 'const engineer = {', color: '#E8F4FD' },
-  { line: '02', code: '  name: "Alisher Karimov",', color: '#00FF87' },
-  { line: '03', code: '  focus: ["Frontend", "Security"],', color: '#00D4FF' },
-  { line: '04', code: '  stack: ["Next.js", "TypeScript", "GSAP"],', color: '#00D4FF' },
-  { line: '05', code: '  clearance: "Ethical Hacker",', color: '#FFB800' },
-  { line: '06', code: '  available: true,', color: '#00FF87' },
-  { line: '07', code: '  mission: "Build secure, fast UIs",', color: '#E8F4FD' },
-  { line: '08', code: '};', color: '#E8F4FD' },
-]
+'use client';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { codeLines } from '@/lib/utils';
 
 export default function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const headlineRef = useRef<HTMLHeadingElement>(null)
-  const codeRef = useRef<HTMLDivElement>(null)
-  const badgesRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const codeRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     // Particle canvas
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     const particles: Array<{
-      x: number
-      y: number
-      vx: number
-      vy: number
-      size: number
-      opacity: number
-      color: string
-    }> = []
-    const colors = ['#00FF87', '#00D4FF', '#FF3B6B']
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      opacity: number;
+      color: string;
+    }> = [];
+    const colors = ['#00FF87', '#00D4FF', '#FF3B6B'];
 
     for (let i = 0; i < 80; i++) {
       particles.push({
@@ -50,51 +39,51 @@ export default function Hero() {
         size: Math.random() * 2 + 0.5,
         opacity: Math.random() * 0.4 + 0.1,
         color: colors[Math.floor(Math.random() * colors.length)],
-      })
+      });
     }
 
-    let animId: number
+    let animId: number;
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p, i) => {
-        p.x += p.vx
-        p.y += p.vy
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
 
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = p.color
-        ctx.globalAlpha = p.opacity
-        ctx.fill()
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.opacity;
+        ctx.fill();
 
         // Draw connections
         particles.slice(i + 1).forEach((p2) => {
-          const dist = Math.hypot(p.x - p2.x, p.y - p2.y)
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
           if (dist < 120) {
-            ctx.beginPath()
-            ctx.moveTo(p.x, p.y)
-            ctx.lineTo(p2.x, p2.y)
-            ctx.strokeStyle = '#00D4FF'
-            ctx.globalAlpha = (1 - dist / 120) * 0.08
-            ctx.lineWidth = 0.5
-            ctx.stroke()
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = '#00D4FF';
+            ctx.globalAlpha = (1 - dist / 120) * 0.08;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
           }
-        })
-        ctx.globalAlpha = 1
-      })
-      animId = requestAnimationFrame(animate)
-    }
-    animate()
+        });
+        ctx.globalAlpha = 1;
+      });
+      animId = requestAnimationFrame(animate);
+    };
+    animate();
 
     const handleResize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    window.addEventListener('resize', handleResize)
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
 
     // GSAP entrance
-    const tl = gsap.timeline({ delay: 0.2 })
+    const tl = gsap.timeline({ delay: 0.2 });
 
     tl.fromTo(
       '.hero-tag',
@@ -136,13 +125,13 @@ export default function Hero() {
         { opacity: 0, x: 20 },
         { opacity: 1, x: 0, stagger: 0.08, duration: 0.4, ease: 'power2.out' },
         '-=0.6',
-      )
+      );
 
     return () => {
-      cancelAnimationFrame(animId)
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return (
     <section
@@ -190,7 +179,7 @@ export default function Hero() {
                 className="w-2 h-2 rounded-full animate-pulse"
                 style={{ backgroundColor: '#00FF87' }}
               />
-              Frontend SWE &amp; Cybersecurity Specialist
+              Frontend • Cybersecurity Learner
             </div>
 
             {/* Headline */}
@@ -199,19 +188,19 @@ export default function Hero() {
                 className="hero-title-1 text-4xl sm:text-5xl lg:text-7xl font-bold mb-2"
                 style={{ color: '#E8F4FD' }}
               >
-                Building
+                Building Fast,
               </div>
               <div
                 className="hero-title-2 text-4xl sm:text-5xl lg:text-7xl font-bold gradient-text"
                 style={{ display: 'block' }}
               >
-                Secure UIs
+                Secure &
               </div>
               <div
                 className="hero-title-1 text-2xl sm:text-4xl lg:text-5xl font-light mt-1"
                 style={{ color: '#7FA8C4' }}
               >
-                from the <span style={{ color: '#00D4FF' }}>ground up.</span>
+                Modern <span style={{ color: '#00D4FF' }}>Web Apps.</span>
               </div>
             </h1>
 
@@ -219,8 +208,8 @@ export default function Hero() {
               className="hero-desc text-lg mb-8 max-w-lg leading-relaxed"
               style={{ color: '#7FA8C4' }}
             >
-              I craft high-performance web interfaces with security baked in. 4+ years bridging the
-              gap between exceptional UX and robust application security.
+              Frontend Engineer specializing in Next.js, React and TypeScript. Currently expanding
+              into Cybersecurity through hands-on labs and Hack The Box.
             </p>
 
             {/* Buttons */}
@@ -229,8 +218,8 @@ export default function Hero() {
                 className="hero-btn group px-6 py-3 font-mono text-sm font-medium rounded transition-all duration-300 relative overflow-hidden"
                 style={{ backgroundColor: '#00FF87', color: '#050A0E' }}
                 onClick={() => {
-                  const el = document.querySelector('#projects')
-                  if (el) el.scrollIntoView({ behavior: 'smooth' })
+                  const el = document.querySelector('#projects');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
                 <span className="relative z-10 flex items-center gap-2">
@@ -248,15 +237,15 @@ export default function Hero() {
                   backgroundColor: 'transparent',
                 }}
                 onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    'rgba(0,212,255,0.08)'
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                    'rgba(0,212,255,0.08)';
                 }}
                 onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent'
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
                 }}
                 onClick={() => {
-                  const el = document.querySelector('#contact')
-                  if (el) el.scrollIntoView({ behavior: 'smooth' })
+                  const el = document.querySelector('#contact');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
                 Get in Touch
@@ -266,9 +255,9 @@ export default function Hero() {
             {/* Stats */}
             <div className="mt-12 flex items-center gap-8">
               {[
-                { val: '4+', label: 'Years XP' },
-                { val: '20+', label: 'Projects' },
-                { val: '99.2%', label: 'Uptime SLA' },
+                { val: '2+', label: 'Years Experience' },
+                { val: '15+', label: 'Projects Built' },
+                { val: 'HTB', label: 'Learning' },
               ].map((s) => (
                 <div key={s.label}>
                   <div className="font-display text-2xl font-bold" style={{ color: '#00FF87' }}>
@@ -359,10 +348,10 @@ export default function Hero() {
                 </div>
                 <div>
                   <div className="font-mono text-xs font-medium" style={{ color: '#00D4FF' }}>
-                    OWASP Certified
+                    Security-First UI
                   </div>
                   <div className="font-mono text-xs" style={{ color: '#3A5568' }}>
-                    Web Security Pro
+                    Frontend + Cybersecurity
                   </div>
                 </div>
               </div>
@@ -377,10 +366,10 @@ export default function Hero() {
               }}
             >
               <div className="font-mono text-xs font-medium" style={{ color: '#FFB800' }}>
-                ◈ CTF Top 5%
+                ◈ Hack The Box
               </div>
               <div className="font-mono text-xs" style={{ color: '#3A5568' }}>
-                HackTheBox ranking
+                Active Learner
               </div>
             </div>
           </div>
@@ -397,5 +386,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }

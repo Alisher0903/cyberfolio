@@ -1,165 +1,219 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { skills } from "@/lib/utils";
+'use client';
 
-if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { skills } from '@/lib/utils';
 
-const categories = Object.keys(skills) as Array<keyof typeof skills>;
+if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
+
+type Category = keyof typeof skills;
+
+const categories = Object.keys(skills) as Category[];
+
+const categoryMeta: Record<
+  Category,
+  { color: string; code: string; eyebrow: string; description: string }
+> = {
+  Frontend: {
+    color: '#00FF87',
+    code: '</>',
+    eyebrow: 'Product engineering',
+    description:
+      'Modern web and mobile interfaces, state management, integrations and delivery workflows.',
+  },
+  Security: {
+    color: '#FF3B6B',
+    code: '[::]',
+    eyebrow: 'Systems & security',
+    description: 'Operating systems, networking and scripting foundations for secure development.',
+  },
+  Other: {
+    color: '#00D4FF',
+    code: '+++',
+    eyebrow: 'Supporting toolkit',
+    description:
+      'Productivity, design and AI-assisted tools used throughout the development process.',
+  },
+};
 
 export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [activeTab, setActiveTab] = useState<keyof typeof skills>("Frontend");
-  const [animated, setAnimated] = useState(false);
+  const [activeTab, setActiveTab] = useState<Category>('Frontend');
+  const activeMeta = categoryMeta[activeTab];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top 70%",
-        onEnter: () => {
-          setAnimated(true);
-          gsap.fromTo(".skill-card", { opacity:0, y:40 }, {
-            opacity:1, y:0, stagger:0.08, duration:0.6, ease:"power2.out"
-          });
+      gsap.fromTo(
+        '.skills-content',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 75%',
+            once: true,
+          },
         },
-      });
+      );
     }, sectionRef);
+
     return () => ctx.revert();
   }, []);
 
-  const tabColors: Record<string, string> = {
-    Frontend: "#00FF87",
-    Security: "#FF3B6B",
-    Backend: "#00D4FF",
-  };
-
   return (
-    <section id="skills" ref={sectionRef} className="py-16 md:py-32" style={{backgroundColor:"#050A0E"}}>
+    <section
+      id="skills"
+      ref={sectionRef}
+      className="py-16 md:py-32"
+      style={{ backgroundColor: '#050A0E' }}
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
         <div className="flex items-center gap-4 mb-10 md:mb-16">
-          <p className="font-mono text-xs" style={{color:"#00FF87"}}>04 / Skills</p>
-          <div className="flex-1 h-px" style={{backgroundColor:"#0E2030"}} />
+          <p className="font-mono text-xs" style={{ color: '#00FF87' }}>
+            04 / Skills
+          </p>
+          <div className="flex-1 h-px" style={{ backgroundColor: '#0E2030' }} />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
-          {/* Left: Heading + tabs */}
-          <div>
-            <h2 className="font-display text-4xl lg:text-5xl font-bold mb-8" style={{color:"#E8F4FD"}}>
-              Capabilities &amp;{" "}
-              <span className="gradient-text">Expertise</span>
+        <div className="skills-content">
+          <div className="max-w-3xl mb-10">
+            <h2
+              className="font-display text-4xl lg:text-5xl font-bold mb-6"
+              style={{ color: '#E8F4FD' }}
+            >
+              Tools I use to turn ideas into{' '}
+              <span className="gradient-text">working products.</span>
             </h2>
-            <p className="text-lg leading-relaxed mb-10" style={{color:"#7FA8C4"}}>
-              I operate at the intersection of frontend engineering and
-              application security — fluent in both the art of crafting
-              interfaces and the science of breaking them.
+            <p className="text-lg leading-relaxed" style={{ color: '#7FA8C4' }}>
+              A practical toolkit built through real projects — grouped by where each skill creates
+              the most value.
             </p>
+          </div>
 
-            {/* Tab buttons */}
-            <div className="flex gap-2 mb-8">
-              {categories.map((cat) => (
+          <div className="flex flex-wrap gap-2 mb-8" role="tablist" aria-label="Skill categories">
+            {categories.map((category) => {
+              const isActive = activeTab === category;
+              const meta = categoryMeta[category];
+
+              return (
                 <button
-                  key={cat}
-                  onClick={() => setActiveTab(cat)}
-                  className="px-4 py-2 font-mono text-sm rounded transition-all duration-300"
+                  key={category}
+                  id={`skills-tab-${category.toLowerCase()}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="skills-panel"
+                  onClick={() => setActiveTab(category)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg border font-mono text-sm transition-all duration-300"
                   style={{
-                    backgroundColor: activeTab === cat ? tabColors[cat] + "15" : "transparent",
-                    color: activeTab === cat ? tabColors[cat] : "#3A5568",
-                    border: `1px solid ${activeTab === cat ? tabColors[cat] + "40" : "#0E2030"}`,
+                    color: isActive ? meta.color : '#7FA8C4',
+                    borderColor: isActive ? `${meta.color}55` : '#0E2030',
+                    backgroundColor: isActive ? `${meta.color}0D` : '#0A1219',
+                    boxShadow: isActive ? `inset 0 -2px 0 ${meta.color}` : 'none',
                   }}
                 >
-                  {cat}
+                  <span aria-hidden="true" style={{ color: isActive ? meta.color : '#3A5568' }}>
+                    {meta.code}
+                  </span>
+                  {category}
+                  <span
+                    className="rounded-full px-1.5 py-0.5 text-[10px]"
+                    style={{
+                      color: isActive ? meta.color : '#3A5568',
+                      backgroundColor: isActive ? `${meta.color}12` : '#050A0E',
+                    }}
+                  >
+                    {skills[category].length}
+                  </span>
                 </button>
-              ))}
-            </div>
-
-            {/* Skills bars */}
-            <div className="space-y-4">
-              {skills[activeTab].map((skill, i) => (
-                <div key={skill.name}>
-                  <div className="flex justify-between mb-1.5">
-                    <span className="font-mono text-sm" style={{color:"#E8F4FD"}}>{skill.name}</span>
-                    <span className="font-mono text-xs" style={{color:tabColors[activeTab]}}>{skill.level}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full" style={{backgroundColor:"#0E2030"}}>
-                    <div
-                      className="h-full rounded-full transition-all duration-1000"
-                      style={{
-                        width: animated ? `${skill.level}%` : "0%",
-                        backgroundColor: tabColors[activeTab],
-                        transitionDelay: `${i * 0.1}s`,
-                        boxShadow: `0 0 8px ${tabColors[activeTab]}60`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* Right: Tool grid */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { name: "Next.js", icon: "⬡", color: "#E8F4FD" },
-              { name: "TypeScript", icon: "TS", color: "#3178C6" },
-              { name: "React", icon: "⚛", color: "#61DAFB" },
-              { name: "GSAP", icon: "⚡", color: "#88CE02" },
-              { name: "Tailwind", icon: "💧", color: "#38BDF8" },
-              { name: "Node.js", icon: "⬡", color: "#339933" },
-              { name: "Python", icon: "🐍", color: "#FFD43B" },
-              { name: "Docker", icon: "🐳", color: "#2496ED" },
-              { name: "Burp Suite", icon: "🔐", color: "#FF6633" },
-              { name: "PostgreSQL", icon: "🐘", color: "#336791" },
-              { name: "Redis", icon: "⚡", color: "#FF4444" },
-              { name: "Figma", icon: "🎨", color: "#A259FF" },
-              { name: "WebGL", icon: "◈", color: "#00D4FF" },
-              { name: "Rust", icon: "⚙", color: "#CE4A00" },
-              { name: "Git", icon: "⊙", color: "#F05032" },
-            ].map((tool) => (
+          <div
+            id="skills-panel"
+            key={activeTab}
+            role="tabpanel"
+            aria-labelledby={`skills-tab-${activeTab.toLowerCase()}`}
+            className="grid lg:grid-cols-[280px_1fr] overflow-hidden rounded-2xl border"
+            style={{ backgroundColor: '#0A1219', borderColor: '#0E2030' }}
+          >
+            <div
+              className="relative p-7 md:p-8 border-b lg:border-b-0 lg:border-r overflow-hidden"
+              style={{ borderColor: '#0E2030' }}
+            >
               <div
-                key={tool.name}
-                className="skill-card group p-4 rounded-xl border cursor-default transition-all duration-300 flex flex-col items-center gap-2"
-                style={{backgroundColor:"#0A1219",borderColor:"#0E2030"}}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = tool.color + "40";
-                  (e.currentTarget as HTMLDivElement).style.backgroundColor = tool.color + "08";
+                className="absolute -right-12 -top-12 h-40 w-40 rounded-full pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle, ${activeMeta.color}12, transparent 68%)`,
                 }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = "#0E2030";
-                  (e.currentTarget as HTMLDivElement).style.backgroundColor = "#0A1219";
-                }}
+                aria-hidden="true"
+              />
+              <p
+                className="font-mono text-[10px] uppercase tracking-[0.18em] mb-5"
+                style={{ color: activeMeta.color }}
               >
-                <span className="text-2xl">{tool.icon}</span>
-                <span className="font-mono text-xs text-center" style={{color:"#7FA8C4"}}>{tool.name}</span>
+                {activeMeta.eyebrow}
+              </p>
+              <div
+                className="font-mono text-4xl font-bold mb-6"
+                style={{ color: activeMeta.color }}
+                aria-hidden="true"
+              >
+                {activeMeta.code}
               </div>
-            ))}
-          </div>
-        </div>
+              <h3 className="font-display text-2xl font-bold mb-3" style={{ color: '#E8F4FD' }}>
+                {activeTab}
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: '#7FA8C4' }}>
+                {activeMeta.description}
+              </p>
+            </div>
 
-        {/* Certifications */}
-        <div className="mt-20">
-          <h3 className="font-display text-2xl font-bold mb-8" style={{color:"#E8F4FD"}}>Certifications</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { name: "OWASP Web Security", org: "OWASP Foundation", year: "2023", color: "#00FF87" },
-              { name: "CEH Practical", org: "EC-Council", year: "2022", color: "#FF3B6B" },
-              { name: "AWS Developer", org: "Amazon", year: "2023", color: "#FFB800" },
-              { name: "Google UX Design", org: "Google", year: "2021", color: "#00D4FF" },
-            ].map((cert) => (
-              <div
-                key={cert.name}
-                className="p-5 rounded-xl border"
-                style={{backgroundColor:"#0A1219",borderColor:"#0E2030"}}
-              >
-                <div
-                  className="w-8 h-1 rounded mb-4"
-                  style={{backgroundColor:cert.color}}
-                />
-                <div className="font-mono text-sm font-medium mb-1" style={{color:"#E8F4FD"}}>{cert.name}</div>
-                <div className="font-mono text-xs" style={{color:"#3A5568"}}>{cert.org} · {cert.year}</div>
-              </div>
-            ))}
+            <ul className="grid sm:grid-cols-2 xl:grid-cols-3 list-none">
+              {skills[activeTab].map((skill, index) => (
+                <li
+                  key={skill}
+                  className="group min-h-20 flex items-center gap-4 px-5 py-4 border-b sm:border-r transition-colors duration-300"
+                  style={{
+                    borderColor: '#0E2030',
+                    backgroundColor: '#0A1219',
+                  }}
+                  onMouseEnter={(event) => {
+                    event.currentTarget.style.backgroundColor = `${activeMeta.color}08`;
+                  }}
+                  onMouseLeave={(event) => {
+                    event.currentTarget.style.backgroundColor = '#0A1219';
+                  }}
+                >
+                  <span
+                    className="font-mono text-[10px] tabular-nums"
+                    style={{ color: '#3A5568' }}
+                    aria-hidden="true"
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full transition-shadow duration-300"
+                    style={{
+                      backgroundColor: activeMeta.color,
+                      boxShadow: `0 0 0 ${activeMeta.color}`,
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className="font-mono text-sm leading-snug transition-colors duration-300"
+                    style={{ color: '#E8F4FD' }}
+                  >
+                    {skill}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

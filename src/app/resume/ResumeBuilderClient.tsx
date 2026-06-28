@@ -1,10 +1,10 @@
-'use client'
-import { useState, useCallback, useRef } from 'react'
-import Link from 'next/link'
-import { useResumeStore, themeColors, ColorTheme, LayoutStyle } from '@/store/resumeStore'
-import ResumePreview from '@/components/resume/ResumePreview'
+'use client';
+import { useState, useCallback, useId, useRef } from 'react';
+import Link from 'next/link';
+import { useResumeStore, themeColors, ColorTheme, LayoutStyle } from '@/store/resumeStore';
+import ResumePreview from '@/components/resume/ResumePreview';
 
-type Tab = 'personal' | 'work' | 'education' | 'projects' | 'skills' | 'style'
+type Tab = 'personal' | 'work' | 'education' | 'projects' | 'skills' | 'style';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'personal', label: 'Personal', icon: '◈' },
@@ -13,7 +13,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'projects', label: 'Projects', icon: '⬡' },
   { id: 'skills', label: 'Skills', icon: '◇' },
   { id: 'style', label: 'Style', icon: '✦' },
-]
+];
 
 const Field = ({
   label,
@@ -22,71 +22,78 @@ const Field = ({
   multiline = false,
   placeholder = '',
 }: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  multiline?: boolean
-  placeholder?: string
-}) => (
-  <div style={{ marginBottom: '0.75rem' }}>
-    <label
-      style={{
-        display: 'block',
-        fontFamily: "'JetBrains Mono',monospace",
-        fontSize: '0.65rem',
-        color: '#3A5568',
-        marginBottom: '0.3rem',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-      }}
-    >
-      {label}
-    </label>
-    {multiline ? (
-      <textarea
-        value={value}
-        rows={3}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  multiline?: boolean;
+  placeholder?: string;
+}) => {
+  const fieldId = useId();
+
+  return (
+    <div style={{ marginBottom: '0.75rem' }}>
+      <label
+        htmlFor={fieldId}
         style={{
-          width: '100%',
-          backgroundColor: '#050A0E',
-          border: '1px solid #0E2030',
-          borderRadius: '6px',
-          padding: '8px 10px',
-          color: '#E8F4FD',
-          fontFamily: "'DM Sans',sans-serif",
-          fontSize: '0.8rem',
-          resize: 'vertical',
-          outline: 'none',
-          lineHeight: 1.5,
+          display: 'block',
+          fontFamily: "'JetBrains Mono',monospace",
+          fontSize: '0.65rem',
+          color: '#3A5568',
+          marginBottom: '0.3rem',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
         }}
-        onFocus={(e) => (e.target.style.borderColor = 'rgba(0,255,135,0.3)')}
-        onBlur={(e) => (e.target.style.borderColor = '#0E2030')}
-      />
-    ) : (
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: '100%',
-          backgroundColor: '#050A0E',
-          border: '1px solid #0E2030',
-          borderRadius: '6px',
-          padding: '8px 10px',
-          color: '#E8F4FD',
-          fontFamily: "'DM Sans',sans-serif",
-          fontSize: '0.8rem',
-          outline: 'none',
-        }}
-        onFocus={(e) => (e.target.style.borderColor = 'rgba(0,255,135,0.3)')}
-        onBlur={(e) => (e.target.style.borderColor = '#0E2030')}
-      />
-    )}
-  </div>
-)
+      >
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          id={fieldId}
+          value={value}
+          rows={3}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          style={{
+            width: '100%',
+            backgroundColor: '#050A0E',
+            border: '1px solid #0E2030',
+            borderRadius: '6px',
+            padding: '8px 10px',
+            color: '#E8F4FD',
+            fontFamily: "'DM Sans',sans-serif",
+            fontSize: '0.8rem',
+            resize: 'vertical',
+            outline: 'none',
+            lineHeight: 1.5,
+          }}
+          onFocus={(e) => (e.target.style.borderColor = 'rgba(0,255,135,0.3)')}
+          onBlur={(e) => (e.target.style.borderColor = '#0E2030')}
+        />
+      ) : (
+        <input
+          id={fieldId}
+          type="text"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          style={{
+            width: '100%',
+            backgroundColor: '#050A0E',
+            border: '1px solid #0E2030',
+            borderRadius: '6px',
+            padding: '8px 10px',
+            color: '#E8F4FD',
+            fontFamily: "'DM Sans',sans-serif",
+            fontSize: '0.8rem',
+            outline: 'none',
+          }}
+          onFocus={(e) => (e.target.style.borderColor = 'rgba(0,255,135,0.3)')}
+          onBlur={(e) => (e.target.style.borderColor = '#0E2030')}
+        />
+      )}
+    </div>
+  );
+};
 
 export default function ResumeBuilderClient() {
   const {
@@ -105,37 +112,37 @@ export default function ResumeBuilderClient() {
     addSkillGroup,
     removeSkillGroup,
     reset,
-  } = useResumeStore()
+  } = useResumeStore();
 
-  const [activeTab, setActiveTab] = useState<Tab>('personal')
-  const [exporting, setExporting] = useState(false)
-  const [previewScale, setPreviewScale] = useState(0.85)
-  const printRef = useRef<HTMLDivElement>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('personal');
+  const [exporting, setExporting] = useState(false);
+  const [previewScale, setPreviewScale] = useState(0.85);
+  const printRef = useRef<HTMLDivElement>(null);
 
   const exportPDF = useCallback(async () => {
-    setExporting(true)
+    setExporting(true);
     try {
-      const { default: html2canvas } = await import('html2canvas')
-      const { default: jsPDF } = await import('jspdf')
+      const { default: html2canvas } = await import('html2canvas');
+      const { default: jsPDF } = await import('jspdf');
 
-      const el = document.getElementById('resume-preview')
-      if (!el) return
+      const el = document.getElementById('resume-preview');
+      if (!el) return;
 
       // 1. Vaqtincha scale ni olib tashlaymiz — 1:1 holda capture uchun
-      const prevTransform = el.style.transform
-      el.style.transform = 'none'
-      el.style.boxShadow = 'none'
-      el.style.border = 'none'
+      const prevTransform = el.style.transform;
+      el.style.transform = 'none';
+      el.style.boxShadow = 'none';
+      el.style.border = 'none';
 
       // 2. Elementning haqiqiy o'lchamini olamiz (mm → px: 1mm ≈ 3.7795px at 96dpi)
       // A4: 210mm × 297mm → 794px × 1123px
-      el.style.width = '794px'
-      el.style.minHeight = '1123px'
-      el.style.maxHeight = '1123px'
-      el.style.overflow = 'hidden'
+      el.style.width = '794px';
+      el.style.minHeight = '1123px';
+      el.style.maxHeight = '1123px';
+      el.style.overflow = 'hidden';
 
       // Render uchun bir frame kutamiz
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
       const canvas = await html2canvas(el, {
         scale: 2, // retina quality
@@ -150,40 +157,40 @@ export default function ResumeBuilderClient() {
         scrollY: 0,
         onclone: (doc) => {
           // Clone ichidagi elementga ham style beramiz
-          const cloned = doc.getElementById('resume-preview')
+          const cloned = doc.getElementById('resume-preview');
           if (cloned) {
-            cloned.style.transform = 'none'
-            cloned.style.width = '794px'
-            cloned.style.minHeight = '1123px'
-            cloned.style.maxHeight = '1123px'
-            cloned.style.overflow = 'hidden'
-            cloned.style.boxShadow = 'none'
-            cloned.style.border = 'none'
+            cloned.style.transform = 'none';
+            cloned.style.width = '794px';
+            cloned.style.minHeight = '1123px';
+            cloned.style.maxHeight = '1123px';
+            cloned.style.overflow = 'hidden';
+            cloned.style.boxShadow = 'none';
+            cloned.style.border = 'none';
           }
         },
-      })
+      });
 
       // 3. Original style ni qaytaramiz
-      el.style.transform = prevTransform
-      el.style.boxShadow = ''
-      el.style.border = ''
-      el.style.width = '210mm'
-      el.style.minHeight = '297mm'
-      el.style.maxHeight = ''
-      el.style.overflow = ''
+      el.style.transform = prevTransform;
+      el.style.boxShadow = '';
+      el.style.border = '';
+      el.style.width = '210mm';
+      el.style.minHeight = '297mm';
+      el.style.maxHeight = '';
+      el.style.overflow = '';
 
       // 4. Exact A4 ga joylashtiramiz — canvas aniq 794×1123 bo'lgani uchun pixel perfect
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
-      const imgData = canvas.toDataURL('image/png', 1.0)
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
-      pdf.save(`${(data.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`)
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+      pdf.save(`${(data.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`);
     } catch (err) {
-      console.error('PDF export error:', err)
-      alert('Export failed. Please try again.')
+      console.error('PDF export error:', err);
+      alert('Export failed. Please try again.');
     } finally {
-      setExporting(false)
+      setExporting(false);
     }
-  }, [data])
+  }, [data]);
 
   const btnStyle = (active: boolean) =>
     ({
@@ -199,7 +206,7 @@ export default function ResumeBuilderClient() {
       display: 'flex',
       alignItems: 'center',
       gap: '0.3rem',
-    }) as React.CSSProperties
+    }) as React.CSSProperties;
 
   const removeBtn = (onClick: () => void) => (
     <button
@@ -217,7 +224,7 @@ export default function ResumeBuilderClient() {
     >
       ✕
     </button>
-  )
+  );
 
   const addBtn = (onClick: () => void, label: string) => (
     <button
@@ -236,17 +243,17 @@ export default function ResumeBuilderClient() {
         transition: 'all 0.2s',
       }}
       onMouseEnter={(e) => {
-        ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#00FF87'
-        ;(e.currentTarget as HTMLButtonElement).style.color = '#00FF87'
+        (e.currentTarget as HTMLButtonElement).style.borderColor = '#00FF87';
+        (e.currentTarget as HTMLButtonElement).style.color = '#00FF87';
       }}
       onMouseLeave={(e) => {
-        ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#0E2030'
-        ;(e.currentTarget as HTMLButtonElement).style.color = '#3A5568'
+        (e.currentTarget as HTMLButtonElement).style.borderColor = '#0E2030';
+        (e.currentTarget as HTMLButtonElement).style.color = '#3A5568';
       }}
     >
       + {label}
     </button>
-  )
+  );
 
   const itemCard = (children: React.ReactNode, onRemove: () => void) => (
     <div
@@ -264,7 +271,7 @@ export default function ResumeBuilderClient() {
       </div>
       {children}
     </div>
-  )
+  );
 
   return (
     <div
@@ -379,6 +386,8 @@ export default function ResumeBuilderClient() {
 
       {/* ── Main layout ──────────────────────────── */}
       <main
+        id="main-content"
+        tabIndex={-1}
         style={{
           flex: 1,
           display: 'grid',
@@ -449,7 +458,7 @@ export default function ResumeBuilderClient() {
                   label="Full Name"
                   value={data.name}
                   onChange={(v) => update({ name: v })}
-                  placeholder="Alisher Karimov"
+                  placeholder="Alisher Sodiqov"
                 />
                 <Field
                   label="Job Title"
@@ -852,5 +861,5 @@ export default function ResumeBuilderClient() {
         </div>
       </main>
     </div>
-  )
+  );
 }
