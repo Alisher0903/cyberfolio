@@ -279,6 +279,9 @@ body {
     padding-bottom: 72px;
     padding-top: 56px;
   }
+  body:has(.resume-builder-page) {
+    padding: 0;
+  }
 }
 
 /* Screen reader only */

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { codeLines } from '@/lib/utils';
+import { codeLines } from '@/data/home';
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);

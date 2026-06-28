@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { aboutCardList, experience } from '@/lib/utils';
+import { aboutCards, experience } from '@/data/home';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
@@ -85,7 +85,7 @@ export default function About() {
 
             {/* Key facts */}
             <div className="grid grid-cols-2 gap-4">
-              {aboutCardList.map((f) => (
+              {aboutCards.map((f) => (
                 <div
                   key={f.label}
                   className="p-4 rounded-xl border"
@@ -96,7 +96,7 @@ export default function About() {
                     {f.label}
                   </div>
                   <div className="font-mono text-sm font-medium" style={{ color: '#E8F4FD' }}>
-                    {f.val}
+                    {f.value}
                   </div>
                 </div>
               ))}
@@ -219,7 +219,7 @@ export default function About() {
                   </div>
 
                   <p className="mb-4 leading-relaxed" style={{ color: '#7FA8C4' }}>
-                    {exp.desc}
+                    {exp.description}
                   </p>
 
                   <div className="flex flex-wrap gap-2">

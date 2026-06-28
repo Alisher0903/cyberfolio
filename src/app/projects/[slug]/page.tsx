@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { projects } from '@/lib/utils';
+import { projects } from '@/data/projects';
 import { siteConfig } from '@/config/site';
 import ProjectDetailClient from './ProjectDetailClient';
 

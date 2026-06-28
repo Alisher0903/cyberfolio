@@ -1,0 +1,88 @@
+import type { Project } from '@/types/project';
+
+export const projects: Project[] = [
+  {
+    id: 1,
+    slug: 'cipher-shield',
+    title: 'CipherShield',
+    subtitle: 'Real-time threat detection platform',
+    description:
+      'A full-stack web application that monitors network traffic, detects anomalies using ML models, and visualizes threats in real-time. Built with WebSockets for live data streaming and a custom rule engine for threat classification.',
+    tech: ['Next.js', 'TypeScript', 'WebSocket', 'Python', 'TensorFlow', 'PostgreSQL', 'Redis'],
+    color: '#00FF87',
+    accentColor: '#00CC6A',
+    category: 'Cybersecurity',
+    year: '2024',
+    link: '#',
+    github: '#',
+    metrics: [
+      { label: 'Threats Blocked', value: '2.4M+' },
+      { label: 'Detection Rate', value: '99.2%' },
+      { label: 'Response Time', value: '<50ms' },
+    ],
+    featured: true,
+  },
+  {
+    id: 2,
+    slug: 'nexus-ui',
+    title: 'Nexus UI',
+    subtitle: 'Component library for security dashboards',
+    description:
+      'An open-source React component library tailored for security and data-heavy applications. Features 60+ components with dark-mode-first design, animated data visualizations, and WCAG 2.1 AA compliance.',
+    tech: ['React', 'TypeScript', 'Storybook', 'Vitest', 'CSS Modules', 'Rollup'],
+    color: '#00D4FF',
+    accentColor: '#0099BB',
+    category: 'Frontend',
+    year: '2024',
+    link: '#',
+    github: '#',
+    metrics: [
+      { label: 'Components', value: '60+' },
+      { label: 'npm downloads', value: '14K/mo' },
+      { label: 'GitHub Stars', value: '890' },
+    ],
+    featured: true,
+  },
+  {
+    id: 3,
+    slug: 'pentest-canvas',
+    title: 'PentestCanvas',
+    subtitle: 'Visual penetration testing toolkit',
+    description:
+      'A browser-based tool for security professionals to map attack surfaces, document findings, and generate compliance reports. Integrates with OWASP ZAP and Burp Suite via REST API.',
+    tech: ['React', 'Canvas API', 'Node.js', 'Express', 'SQLite', 'Docker'],
+    color: '#FF3B6B',
+    accentColor: '#CC2A55',
+    category: 'Security Tools',
+    year: '2023',
+    link: '#',
+    github: '#',
+    metrics: [
+      { label: 'Active Users', value: '340+' },
+      { label: 'Reports Generated', value: '1.2K' },
+      { label: 'Integrations', value: '8' },
+    ],
+    featured: true,
+  },
+  {
+    id: 4,
+    slug: 'waveterm',
+    title: 'WaveTerm',
+    subtitle: 'GPU-accelerated terminal emulator',
+    description:
+      'A high-performance terminal emulator built with WebGL rendering for smooth 60fps scrollback, native SSH integration, split panes, and a plugin system. Targets developers who live in the terminal.',
+    tech: ['Electron', 'WebGL', 'TypeScript', 'Rust', 'Node.js'],
+    color: '#FFB800',
+    accentColor: '#CC9200',
+    category: 'Developer Tools',
+    year: '2023',
+    link: '#',
+    github: '#',
+    metrics: [
+      { label: 'Render FPS', value: '60' },
+      { label: 'Downloads', value: '4.1K' },
+      { label: 'Plugin API calls', value: '22' },
+    ],
+    featured: false,
+  },
+];
