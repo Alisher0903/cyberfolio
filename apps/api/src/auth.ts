@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'hono';
-import { createPublicSupabaseClient, createServiceSupabaseClient } from '@alisherdev/database';
+import { createPublicSupabaseClient, createServiceSupabaseClient } from './database.js';
 import { getEnv } from './env.js';
 
 export const requireAdmin: MiddlewareHandler = async (context, next) => {

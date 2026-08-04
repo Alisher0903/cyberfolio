@@ -105,15 +105,12 @@ importers:
 
   apps/api:
     dependencies:
-      '@alisherdev/database':
-        specifier: workspace:*
-        version: link:../../packages/database
-      '@alisherdev/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@hono/node-server':
         specifier: ^1.19.10
         version: 1.19.17(hono@4.12.32)
+      '@supabase/supabase-js':
+        specifier: ^2.110.7
+        version: 2.111.0
       hono:
         specifier: ^4.10.7
         version: 4.12.32

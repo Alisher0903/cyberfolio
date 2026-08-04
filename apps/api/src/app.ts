@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { createHash } from 'node:crypto';
-import { createServiceSupabaseClient } from '@alisherdev/database';
+import { createServiceSupabaseClient } from './database.js';
 import { getEnv } from './env.js';
 import { requireAdmin } from './auth.js';
 import {

@@ -1,4 +1,4 @@
-import { createServiceSupabaseClient } from '@alisherdev/database';
+import { createServiceSupabaseClient } from '../database.js';
 import { projects } from '../../../web/src/data/projects';
 import { projectDetails } from '../../../web/src/data/project-details';
 import { experience } from '../../../web/src/data/home';
