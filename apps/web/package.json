@@ -13,15 +13,15 @@
   "dependencies": {
     "@alisherdev/shared": "workspace:*",
     "@gsap/react": "^2.1.1",
-    "@types/jspdf": "^2.0.0",
     "clsx": "^2.1.1",
     "gsap": "^3.12.5",
     "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
+    "jspdf": "^4.2.1",
     "lenis": "^1.1.6",
-    "next": "15.5.19",
+    "next": "15.5.22",
     "react": "^18",
     "react-dom": "^18",
+    "sharp": "^0.35.3",
     "tailwind-merge": "^2.4.0",
     "zustand": "^4.5.4"
   },

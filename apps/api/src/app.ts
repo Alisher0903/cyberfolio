@@ -22,6 +22,10 @@ type Variables = { adminUserId: string };
 export const app = new Hono<{ Variables: Variables }>().basePath('/api/v1');
 
 app.use('*', secureHeaders());
+app.use('/admin/*', async (context, next) => {
+  context.header('Cache-Control', 'no-store');
+  await next();
+});
 app.use(
   '*',
   cors({

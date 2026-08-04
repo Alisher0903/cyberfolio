@@ -1,0 +1,13 @@
+/* TEAM */
+Developer: Alisher Sodiqov
+Site: https://alisherdev.uz
+Contact: info@alisherdev.uz
+Location: Tashkent, Uzbekistan
+
+/* TECHNOLOGY */
+Frontend: Next.js, React, TypeScript, Tailwind CSS
+Backend: Node.js, Hono, Supabase
+Hosting: Vercel
+
+/* SECURITY */
+Security contact: https://alisherdev.uz/.well-known/security.txt

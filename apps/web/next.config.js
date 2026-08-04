@@ -14,10 +14,28 @@ const nextConfig = {
 
   // Security headers
   async headers() {
+    const contentSecurityPolicy = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https://kxwuqulepsuwnlvygfij.supabase.co",
+      "connect-src 'self' https://api.alisherdev.uz",
+      'upgrade-insecure-requests',
+    ].join('; ');
+
     return [
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: contentSecurityPolicy,
+          },
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
@@ -73,15 +91,6 @@ const nextConfig = {
     ];
   },
 
-  // Rewrites for sitemap
-  async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap',
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

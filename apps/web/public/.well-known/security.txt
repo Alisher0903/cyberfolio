@@ -1,0 +1,5 @@
+Contact: mailto:info@alisherdev.uz
+Canonical: https://alisherdev.uz/.well-known/security.txt
+Expires: 2027-08-04T00:00:00.000Z
+Preferred-Languages: uz, en
+Policy: https://alisherdev.uz/

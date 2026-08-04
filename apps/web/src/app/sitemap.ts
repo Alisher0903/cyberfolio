@@ -1,8 +1,25 @@
 import type { MetadataRoute } from 'next';
-import { projects } from '@/data/projects';
+import { projects as fallbackProjects } from '@/data/projects';
 import { siteConfig } from '@/config/site';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  let projects = fallbackProjects;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (apiUrl) {
+    try {
+      const response = await fetch(`${apiUrl}/portfolio`, { next: { revalidate } });
+      if (response.ok) {
+        const data = (await response.json()) as { projects?: typeof fallbackProjects };
+        if (Array.isArray(data.projects)) projects = data.projects;
+      }
+    } catch {
+      // Keep the bundled project list when the API is temporarily unavailable.
+    }
+  }
+
   const projectPages = projects.map((project) => ({
     url: `${siteConfig.url}/projects/${project.slug}`,
     changeFrequency: 'monthly' as const,
