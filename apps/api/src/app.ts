@@ -27,7 +27,9 @@ app.use(
   cors({
     origin: (origin) => {
       const env = getEnv();
-      return [env.CLIENT_ORIGIN, env.ADMIN_ORIGIN].includes(origin) ? origin : env.CLIENT_ORIGIN;
+      const clientOrigins = env.CLIENT_ORIGIN.split(',').map((value) => value.trim());
+      const adminOrigins = env.ADMIN_ORIGIN.split(',').map((value) => value.trim());
+      return [...clientOrigins, ...adminOrigins].includes(origin) ? origin : clientOrigins[0];
     },
     allowHeaders: ['Authorization', 'Content-Type'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
