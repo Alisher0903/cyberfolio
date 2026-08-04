@@ -12,6 +12,8 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
+.vercel/
+supabase/.temp/
 *.swp
 *.swo
 *~

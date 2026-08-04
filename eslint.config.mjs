@@ -38,6 +38,10 @@ export default [
         fetch: true,
         URL: true,
         URLSearchParams: true,
+        AbortController: true,
+        RequestInit: true,
+        File: true,
+        crypto: true,
         process: true,
         // Analytics globals
         gtag: true,

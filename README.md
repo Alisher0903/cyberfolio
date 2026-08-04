@@ -193,7 +193,7 @@ MIT License - see LICENSE file for details
 - **Email**: info@alisherdev.uz
 - **Phone**: +998 (90) 880-03-13
 - **GitHub**: [Alisher0903](https://github.com/Alisher0903)
-- **LinkedIn**: [alisher-sodiqov](https://www.linkedin.com/in/alisher-sodiqov)
+- **LinkedIn**: [alisher-sodiqov-491183310](https://www.linkedin.com/in/alisher-sodiqov-491183310)
 - **Twitter**: [@ascyber777](https://x.com/ascyber777)
 - **Website**: [alisherdev.uz](https://alisherdev.uz)
 

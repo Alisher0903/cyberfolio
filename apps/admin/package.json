@@ -1,0 +1,26 @@
+{
+  "name": "@alisherdev/admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "eslint src --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "node -e \"console.log('admin: no tests yet')\""
+  },
+  "dependencies": {
+    "@alisherdev/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.110.7",
+    "next": "15.5.19",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
+}

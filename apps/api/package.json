@@ -1,0 +1,27 @@
+{
+  "name": "@alisherdev/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=.env.local --import tsx src/server.ts",
+    "sync:content": "node --env-file=.env.local --import tsx src/scripts/sync-existing-content.ts",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@alisherdev/database": "workspace:*",
+    "@alisherdev/shared": "workspace:*",
+    "@hono/node-server": "^1.19.10",
+    "hono": "^4.10.7",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.20.6",
+    "typescript": "^5",
+    "vitest": "^4.0.15"
+  }
+}
