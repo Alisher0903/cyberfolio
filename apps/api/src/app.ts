@@ -3,8 +3,8 @@ import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { createHash } from 'node:crypto';
 import { createServiceSupabaseClient } from '@alisherdev/database';
-import { getEnv } from './env';
-import { requireAdmin } from './auth';
+import { getEnv } from './env.js';
+import { requireAdmin } from './auth.js';
 import {
   contactMessageSchema,
   experienceSchema,
@@ -15,8 +15,8 @@ import {
   skillCategorySchema,
   socialLinkSchema,
   siteSettingSchema,
-} from './schemas';
-import { sendTelegramContactNotification } from './telegram';
+} from './schemas.js';
+import { sendTelegramContactNotification } from './telegram.js';
 
 type Variables = { adminUserId: string };
 export const app = new Hono<{ Variables: Variables }>().basePath('/api/v1');

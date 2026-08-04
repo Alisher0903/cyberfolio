@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono';
 import { createPublicSupabaseClient, createServiceSupabaseClient } from '@alisherdev/database';
-import { getEnv } from './env';
+import { getEnv } from './env.js';
 
 export const requireAdmin: MiddlewareHandler = async (context, next) => {
   const authorization = context.req.header('Authorization');
