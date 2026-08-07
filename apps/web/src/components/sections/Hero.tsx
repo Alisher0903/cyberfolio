@@ -15,8 +15,8 @@ export default function Hero() {
     { line: '02', code: `  name: "${name}",`, color: '#00FF87' },
     { line: '03', code: `  role: "${role}",`, color: '#00D4FF' },
     { line: '04', code: `  stack: ${setting('stack', '["Next.js", "React", "TypeScript", "Tailwind CSS"]')},`, color: '#C3E88D' },
-    { line: '05', code: `  learning: "${setting('learning', 'Cybersecurity')}",`, color: '#FFCB6B' },
-    { line: '06', code: `  training: "${setting('training', 'Hack The Box')}",`, color: '#F78C6C' },
+    { line: '05', code: `  security: ${setting('security', '["Web Security", "Penetration Testing", "Linux"]')},`, color: '#FFCB6B' },
+    { line: '06', code: `  focus: "${setting('focus', 'Security-First Development')}",`, color: '#F78C6C' },
     { line: '07', code: `  available: ${heroSettings.availability === false ? 'false' : 'true'},`, color: '#FF5370' },
     { line: '08', code: '};', color: '#E8F4FD' },
   ];

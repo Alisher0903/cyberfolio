@@ -75,14 +75,15 @@ export default function About() {
               Frontend Engineer <span className="gradient-text">with a Security-First Mindset</span>
             </h2>
             <p className="text-lg leading-relaxed mb-3" style={{ color: '#7FA8C4' }}>
-              Frontend Developer specializing in Next.js, React, and TypeScript, focused on building
-              high-performance web applications.
+              Frontend Engineer specializing in Next.js, React, and TypeScript, focused on building
+              fast, scalable, and maintainable web applications.
             </p>
             <p className="text-lg leading-relaxed mb-8" style={{ color: '#7FA8C4' }}>
-              Alongside frontend development, I'm expanding into cybersecurity through hands-on
-              labs, Hack The Box, and CTF challenges. <br />
-              My goal is to combine modern frontend engineering with a security-first mindset to
-              build applications that are fast, reliable, and secure.
+              Alongside frontend engineering, I have hands-on experience in web security,
+              penetration testing, Linux environments, and vulnerability assessment through
+              practical security labs and real-world attack scenarios. <br />I combine development
+              experience with a security-first approach to build applications that are not only fast
+              and scalable, but also designed with security in mind.
             </p>
 
             {/* Key facts */}

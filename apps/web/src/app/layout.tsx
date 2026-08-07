@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import CustomCursorWrapper from '@/components/layout/CustomCursorWrapper';
+import PageProgressBar from '@/components/layout/PageProgressBar';
+import ScrollProgressBar from '@/components/layout/ScrollProgressBar';
+import ToTopButton from '@/components/layout/ToTopButton';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -88,6 +91,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <PageProgressBar />
+        <ScrollProgressBar />
+
         {/* Global custom cursor — renders on ALL pages */}
         <CustomCursorWrapper />
 
@@ -104,6 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
 
         {children}
+        <ToTopButton />
       </body>
     </html>
   );

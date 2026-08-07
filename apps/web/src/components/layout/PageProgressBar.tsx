@@ -1,21 +1,42 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 export default function PageProgressBar() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const handleStop = () => setIsLoading(false);
+    setIsLoading(false);
+  }, [pathname]);
 
-    // For Next.js 13+ App Router
-    router.prefetch('/');
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const anchor = (event.target as HTMLElement | null)?.closest?.('a');
+      if (!anchor || anchor.target === '_blank' || event.metaKey || event.ctrlKey || event.shiftKey) {
+        return;
+      }
+
+      const destination = new URL(anchor.href, window.location.href);
+      const sameDocument =
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search;
+
+      if (destination.origin === window.location.origin && !sameDocument) {
+        setIsLoading(true);
+      }
+    };
+
+    const handlePopState = () => setIsLoading(true);
+
+    document.addEventListener('click', handleClick);
+    window.addEventListener('popstate', handlePopState);
 
     return () => {
-      handleStop();
+      document.removeEventListener('click', handleClick);
+      window.removeEventListener('popstate', handlePopState);
     };
-  }, [router]);
+  }, []);
 
   return (
     <>

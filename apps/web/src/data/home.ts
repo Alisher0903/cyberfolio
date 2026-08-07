@@ -16,8 +16,8 @@ export const codeLines = [
 export const aboutCards = [
   { icon: '📍', label: 'Location', value: 'Tashkent, Uzbekistan' },
   { icon: '💻', label: 'Core Stack', value: 'Next.js • React.js' },
-  { icon: '📚', label: 'Learning', value: 'Hack The Box • CTFs' },
-  { icon: '🎯', label: 'Goal', value: 'Secure & Scalable Web Apps' },
+  { icon: '📚', label: 'Security', value: 'Web Security • Pentesting' },
+  { icon: '🎯', label: 'Focus', value: 'Secure & Scalable Web Apps' },
 ] as const;
 
 export const experience = [
