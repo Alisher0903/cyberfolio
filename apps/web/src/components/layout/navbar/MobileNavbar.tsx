@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { BrandLogo } from './BrandLogo';
-import { navLinks, type NavbarViewProps } from './navbar.config';
+import { type NavbarViewProps } from './navbar.config';
 import { cn } from '@/lib/utils';
 
-export function MobileNavbar({ active, onNavigate }: NavbarViewProps) {
+export function MobileNavbar({ active, links, onNavigate }: NavbarViewProps) {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-border bg-bg/95 px-4 py-3 backdrop-blur-xl">
@@ -21,21 +21,21 @@ export function MobileNavbar({ active, onNavigate }: NavbarViewProps) {
         className="safe-area-pb fixed inset-x-0 bottom-0 z-50 border-t border-border bg-bg/[0.97] backdrop-blur-2xl"
       >
         <div className="relative h-0.5 w-full bg-surface">
-          {navLinks.map((link, index) => (
+          {links.map((link, index) => (
             <span
               key={link.label}
               className={cn(
-                'absolute h-full w-1/5 bg-transparent transition-all duration-300',
+                'absolute h-full bg-transparent transition-all duration-300',
                 active === link.label && 'bg-accent shadow-[0_0_8px_#00FF87]',
               )}
-              style={{ left: `${index * 20}%` }}
+              style={{ left: `${index * (100 / links.length)}%`, width: `${100 / links.length}%` }}
               aria-hidden="true"
             />
           ))}
         </div>
 
         <ul className="flex list-none items-stretch">
-          {navLinks.map((link) => {
+          {links.map((link) => {
             const isActive = active === link.label;
 
             return (

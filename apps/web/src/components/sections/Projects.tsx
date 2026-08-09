@@ -49,19 +49,7 @@ export default function Projects() {
   const project = projects[activeIndex];
 
   if (!project) {
-    return (
-      <section id="projects" className="flex min-h-[60vh] items-center bg-bg px-6 py-24">
-        <div className="mx-auto w-full max-w-7xl rounded-2xl border border-border bg-surface p-8">
-          <p className="mb-2 font-mono text-xs text-accent">03 / Projects</p>
-          <h2 className="font-display text-3xl font-bold text-text-primary">
-            Projects are temporarily unavailable.
-          </h2>
-          <p className="mt-3 text-text-secondary">
-            The live content service could not be reached. Please try again shortly.
-          </p>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   return (

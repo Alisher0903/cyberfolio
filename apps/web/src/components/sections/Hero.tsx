@@ -4,20 +4,36 @@ import { gsap } from 'gsap';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
 
 export default function Hero() {
-  const { settings } = usePortfolioData();
+  const { settings, projects } = usePortfolioData();
   const heroSettings = settings.hero ?? {};
   const setting = (key: string, fallback: string) =>
-    typeof heroSettings[key] === 'string' ? heroSettings[key] as string : fallback;
+    typeof heroSettings[key] === 'string' ? (heroSettings[key] as string) : fallback;
   const name = setting('name', 'Alisher Sodiqov');
   const role = setting('role', 'Frontend Engineer');
   const codeLines = [
     { line: '01', code: 'const developer = {', color: '#E8F4FD' },
     { line: '02', code: `  name: "${name}",`, color: '#00FF87' },
     { line: '03', code: `  role: "${role}",`, color: '#00D4FF' },
-    { line: '04', code: `  stack: ${setting('stack', '["Next.js", "React", "TypeScript", "Tailwind CSS"]')},`, color: '#C3E88D' },
-    { line: '05', code: `  security: ${setting('security', '["Web Security", "Penetration Testing", "Linux"]')},`, color: '#FFCB6B' },
-    { line: '06', code: `  focus: "${setting('focus', 'Security-First Development')}",`, color: '#F78C6C' },
-    { line: '07', code: `  available: ${heroSettings.availability === false ? 'false' : 'true'},`, color: '#FF5370' },
+    {
+      line: '04',
+      code: `  stack: ${setting('stack', '["Next.js", "React", "TypeScript", "Tailwind CSS"]')},`,
+      color: '#C3E88D',
+    },
+    {
+      line: '05',
+      code: `  security: ${setting('security', '["Web Security", "Penetration Testing", "Linux"]')},`,
+      color: '#FFCB6B',
+    },
+    {
+      line: '06',
+      code: `  focus: "${setting('focus', 'Security-First Development')}",`,
+      color: '#F78C6C',
+    },
+    {
+      line: '07',
+      code: `  available: ${heroSettings.availability === false ? 'false' : 'true'},`,
+      color: '#FF5370',
+    },
     { line: '08', code: '};', color: '#E8F4FD' },
   ];
   const heroDescription =
@@ -234,21 +250,23 @@ export default function Hero() {
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-4">
-              <button
-                className="hero-btn group px-6 py-3 font-mono text-sm font-medium rounded transition-all duration-300 relative overflow-hidden"
-                style={{ backgroundColor: '#00FF87', color: '#050A0E' }}
-                onClick={() => {
-                  const el = document.querySelector('#projects');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  View Projects
-                  <span className="group-hover:translate-x-1 transition-transform duration-200">
-                    →
+              {projects.length > 0 && (
+                <button
+                  className="hero-btn group px-6 py-3 font-mono text-sm font-medium rounded transition-all duration-300 relative overflow-hidden"
+                  style={{ backgroundColor: '#00FF87', color: '#050A0E' }}
+                  onClick={() => {
+                    const el = document.querySelector('#projects');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    View Projects
+                    <span className="group-hover:translate-x-1 transition-transform duration-200">
+                      →
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              )}
               <button
                 className="hero-btn px-6 py-3 font-mono text-sm font-medium rounded border transition-all duration-300"
                 style={{
@@ -275,8 +293,14 @@ export default function Hero() {
             {/* Stats */}
             <div className="mt-12 flex items-center gap-8">
               {[
-                { val: setting('stat1Value', '2+'), label: setting('stat1Label', 'Years Experience') },
-                { val: setting('stat2Value', '15+'), label: setting('stat2Label', 'Projects Built') },
+                {
+                  val: setting('stat1Value', '2+'),
+                  label: setting('stat1Label', 'Years Experience'),
+                },
+                {
+                  val: setting('stat2Value', '15+'),
+                  label: setting('stat2Label', 'Projects Built'),
+                },
                 { val: setting('stat3Value', 'HTB'), label: setting('stat3Label', 'Learning') },
               ].map((s) => (
                 <div key={s.label}>

@@ -7,8 +7,10 @@ export const navLinks = [
 ] as const;
 
 export type NavLabel = (typeof navLinks)[number]['label'];
+export type NavLink = (typeof navLinks)[number];
 
 export interface NavbarViewProps {
   active: NavLabel;
+  links: readonly NavLink[];
   onNavigate: (href: string, label: NavLabel) => void;
 }

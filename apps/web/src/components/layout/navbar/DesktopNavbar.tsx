@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import Link from 'next/link';
 import LiveClock from '../TimeCost';
 import { BrandLogo } from './BrandLogo';
-import { navLinks, type NavbarViewProps } from './navbar.config';
+import { type NavbarViewProps } from './navbar.config';
 import { cn } from '@/lib/utils';
 
 interface DesktopNavbarProps extends NavbarViewProps {
@@ -10,7 +10,7 @@ interface DesktopNavbarProps extends NavbarViewProps {
 }
 
 export const DesktopNavbar = forwardRef<HTMLElement, DesktopNavbarProps>(
-  ({ active, scrolled, onNavigate }, ref) => (
+  ({ active, links, scrolled, onNavigate }, ref) => (
     <nav
       ref={ref}
       aria-label="Main navigation"
@@ -23,7 +23,7 @@ export const DesktopNavbar = forwardRef<HTMLElement, DesktopNavbarProps>(
         <BrandLogo />
 
         <ul className="flex list-none items-center gap-1">
-          {navLinks.map((link) => {
+          {links.map((link) => {
             const isActive = active === link.label;
 
             return (
