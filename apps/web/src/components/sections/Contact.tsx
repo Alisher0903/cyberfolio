@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
+import { SiteFooter } from './contact/SiteFooter';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
@@ -10,7 +11,7 @@ export default function Contact() {
   const { socials: links, settings } = usePortfolioData();
   const contactSettings = settings.contact ?? {};
   const contactSetting = (key: string, fallback: string) =>
-    typeof contactSettings[key] === 'string' ? contactSettings[key] as string : fallback;
+    typeof contactSettings[key] === 'string' ? (contactSettings[key] as string) : fallback;
   const sectionRef = useRef<HTMLElement>(null);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
@@ -73,7 +74,9 @@ export default function Contact() {
               style={{ color: '#E8F4FD' }}
             >
               {contactSetting('headingPrefix', "Let's build something")}{' '}
-              <span className="gradient-text">{contactSetting('headingAccent', 'worth hacking.')}</span>
+              <span className="gradient-text">
+                {contactSetting('headingAccent', 'worth hacking.')}
+              </span>
             </h2>
             <p className="text-lg leading-relaxed mb-10" style={{ color: '#7FA8C4' }}>
               {typeof contactSettings.description === 'string'
@@ -249,30 +252,7 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Footer */}
-        <div
-          className="mt-20 pt-8 border-t flex flex-wrap items-center justify-between gap-4"
-          style={{ borderColor: '#0E2030' }}
-        >
-          <div className="font-mono text-xs" style={{ color: '#3A5568' }}>
-            © {new Date().getFullYear()} Alisher Sodiqov. Built with Next.js + GSAP.
-          </div>
-          <div className="flex items-center gap-2">
-            <div
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: '#00FF87' }}
-            />
-            <span className="font-mono text-xs" style={{ color: '#3A5568' }}>
-              All systems operational
-            </span>
-          </div>
-          <div className="font-mono text-xs" style={{ color: '#3A5568' }}>
-            {typeof contactSettings.location === 'string'
-              ? contactSettings.location
-              : 'Tashkent, Uzbekistan'}{' '}
-            🇺🇿
-          </div>
-        </div>
+        <SiteFooter socials={links} />
       </div>
     </section>
   );

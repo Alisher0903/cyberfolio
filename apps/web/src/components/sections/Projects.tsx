@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
@@ -17,7 +18,7 @@ export default function Projects() {
   useEffect(() => {
     const section = sectionRef.current;
     const container = containerRef.current;
-    if (!section || !container) return;
+    if (!section || !container || projects.length === 0) return;
 
     const ctx = gsap.context(() => {
       const total = projects.length;
@@ -46,6 +47,22 @@ export default function Projects() {
   }, [projects.length]);
 
   const project = projects[activeIndex];
+
+  if (!project) {
+    return (
+      <section id="projects" className="flex min-h-[60vh] items-center bg-bg px-6 py-24">
+        <div className="mx-auto w-full max-w-7xl rounded-2xl border border-border bg-surface p-8">
+          <p className="mb-2 font-mono text-xs text-accent">03 / Projects</p>
+          <h2 className="font-display text-3xl font-bold text-text-primary">
+            Projects are temporarily unavailable.
+          </h2>
+          <p className="mt-3 text-text-secondary">
+            The live content service could not be reached. Please try again shortly.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div ref={sectionRef} id="projects" style={{ height: `${(projects.length + 1) * 100}vh` }}>
@@ -258,63 +275,79 @@ export default function Projects() {
                   https://{project?.slug}.dev
                 </div>
               </div>
-              <div className="p-5 space-y-3">
-                <div className="flex gap-3">
-                  <div
-                    className="h-8 rounded flex-1"
-                    style={{ backgroundColor: project?.color + '15' }}
-                  >
+              {project.coverImage ? (
+                <div className="relative aspect-[16/9] w-full">
+                  <Image
+                    src={project.coverImage}
+                    alt={`${project.title} project cover`}
+                    fill
+                    sizes="50vw"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="p-5 space-y-3">
+                  <div className="flex gap-3">
                     <div
-                      className="h-full w-1/3 rounded"
-                      style={{ backgroundColor: project?.color + '30' }}
-                    />
-                  </div>
-                  <div
-                    className="h-8 w-20 rounded flex items-center justify-center font-mono text-xs"
-                    style={{ backgroundColor: project?.color, color: '#050A0E' }}
-                  >
-                    LIVE
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {project?.metrics.map((m, i) => (
-                    <div key={i} className="rounded-lg p-3" style={{ backgroundColor: '#050A0E' }}>
+                      className="h-8 rounded flex-1"
+                      style={{ backgroundColor: project?.color + '15' }}
+                    >
                       <div
-                        className="font-mono text-base font-bold"
-                        style={{ color: project?.color }}
-                      >
-                        {m.value}
-                      </div>
-                      <div className="font-mono text-xs mt-0.5" style={{ color: '#3A5568' }}>
-                        {m.label}
-                      </div>
-                      <div className="mt-2 h-1 rounded" style={{ backgroundColor: '#0E2030' }}>
-                        <div
-                          className="h-full rounded"
-                          style={{ backgroundColor: project?.color, width: `${55 + i * 15}%` }}
-                        />
-                      </div>
+                        className="h-full w-1/3 rounded"
+                        style={{ backgroundColor: project?.color + '30' }}
+                      />
                     </div>
-                  ))}
-                </div>
-                <div className="rounded-lg p-4" style={{ backgroundColor: '#050A0E' }}>
-                  <div className="font-mono text-xs mb-2" style={{ color: '#3A5568' }}>
-                    Activity
+                    <div
+                      className="h-8 w-20 rounded flex items-center justify-center font-mono text-xs"
+                      style={{ backgroundColor: project?.color, color: '#050A0E' }}
+                    >
+                      LIVE
+                    </div>
                   </div>
-                  <div className="flex items-end gap-0.5 h-12">
-                    {Array.from({ length: 24 }, (_, i) => (
+                  <div className="grid grid-cols-3 gap-3">
+                    {project?.metrics.map((m, i) => (
                       <div
                         key={i}
-                        className="flex-1 rounded-t"
-                        style={{
-                          backgroundColor: project?.color + (i % 3 === 0 ? '80' : '20'),
-                          height: `${Math.sin(i * 0.8) * 30 + 50}%`,
-                        }}
-                      />
+                        className="rounded-lg p-3"
+                        style={{ backgroundColor: '#050A0E' }}
+                      >
+                        <div
+                          className="font-mono text-base font-bold"
+                          style={{ color: project?.color }}
+                        >
+                          {m.value}
+                        </div>
+                        <div className="font-mono text-xs mt-0.5" style={{ color: '#3A5568' }}>
+                          {m.label}
+                        </div>
+                        <div className="mt-2 h-1 rounded" style={{ backgroundColor: '#0E2030' }}>
+                          <div
+                            className="h-full rounded"
+                            style={{ backgroundColor: project?.color, width: `${55 + i * 15}%` }}
+                          />
+                        </div>
+                      </div>
                     ))}
                   </div>
+                  <div className="rounded-lg p-4" style={{ backgroundColor: '#050A0E' }}>
+                    <div className="font-mono text-xs mb-2" style={{ color: '#3A5568' }}>
+                      Activity
+                    </div>
+                    <div className="flex items-end gap-0.5 h-12">
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-t"
+                          style={{
+                            backgroundColor: project?.color + (i % 3 === 0 ? '80' : '20'),
+                            height: `${Math.sin(i * 0.8) * 30 + 50}%`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -18,4 +18,5 @@ export interface Project {
   github: string;
   metrics: ProjectMetric[];
   featured: boolean;
+  coverImage?: string | null;
 }

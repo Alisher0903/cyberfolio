@@ -1,7 +1,6 @@
-import { projects as fallbackProjects } from '@/data/projects';
-import { projectDetails } from '@/data/project-details';
 import type { Project } from '@/types/project';
 import type { ProjectDetail } from '@/types/project-detail';
+import { getProjectImageUrl } from './project-image';
 
 interface ApiProject {
   id: string;
@@ -18,6 +17,7 @@ interface ApiProject {
   github_url: string;
   metrics: Array<{ label: string; value: string }>;
   featured: boolean;
+  cover_image_path?: string | null;
   project_details?: ApiDetail | ApiDetail[] | null;
 }
 
@@ -48,19 +48,20 @@ function mapProject(project: ApiProject, id: number): Project {
     github: project.github_url,
     metrics: project.metrics,
     featured: project.featured,
+    coverImage: getProjectImageUrl(project.cover_image_path),
   };
 }
 
 export async function getPortfolioProjects(): Promise<Project[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) return fallbackProjects;
+  if (!apiUrl) return [];
   try {
     const response = await fetch(`${apiUrl}/portfolio`, { next: { revalidate: 60 } });
-    if (!response.ok) return fallbackProjects;
+    if (!response.ok) return [];
     const body = (await response.json()) as { projects: ApiProject[] };
     return body.projects.map((project, index) => mapProject(project, index + 1));
   } catch {
-    return fallbackProjects;
+    return [];
   }
 }
 
@@ -95,6 +96,5 @@ export async function getPortfolioProject(slug: string) {
     }
   }
 
-  const project = fallbackProjects.find((item) => item.slug === slug);
-  return project ? { project, detail: projectDetails[slug] ?? null } : null;
+  return null;
 }

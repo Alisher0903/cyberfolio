@@ -1,8 +1,29 @@
 import { siteConfig } from '@/config/site';
 import { socialLinks } from './contact.config';
 import { SocialIcon } from './SocialIcon';
+import type { SocialItem } from '@/features/portfolio/PortfolioDataProvider';
+import type { SocialIconName } from './contact.config';
 
-export function SiteFooter() {
+const iconForLabel = (label: string): SocialIconName => {
+  const normalized = label.toLowerCase();
+  if (normalized.includes('linkedin')) return 'linkedin';
+  if (normalized.includes('telegram')) return 'telegram';
+  if (normalized.includes('instagram')) return 'instagram';
+  if (normalized.includes('twitter') || normalized === 'x') return 'twitter';
+  if (normalized.includes('mail')) return 'email';
+  if (normalized.includes('phone') || normalized.includes('tel')) return 'phone';
+  return 'github';
+};
+
+export function SiteFooter({ socials }: { socials?: SocialItem[] }) {
+  const links = socials?.length
+    ? socials.map((item) => ({
+        label: item.label,
+        href: item.href,
+        icon: iconForLabel(item.label),
+        external: !item.href.startsWith('mailto:') && !item.href.startsWith('tel:'),
+      }))
+    : socialLinks;
   return (
     <footer className="mt-20 border-t border-border pt-8">
       <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
@@ -13,7 +34,7 @@ export function SiteFooter() {
 
         <nav aria-label="Social and contact links">
           <ul className="flex list-none flex-wrap items-center justify-center gap-2">
-            {socialLinks.map((link) => (
+            {links.map((link) => (
               <li key={link.label}>
                 <a
                   href={link.href}

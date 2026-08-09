@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { projectDetails } from '@/data/project-details';
 import { useProjectDetailAnimations } from '@/features/projects/hooks/useProjectDetailAnimations';
 import type { Project } from '@/types/project';
@@ -13,8 +14,13 @@ interface ProjectDetailClientProps {
   detail?: ProjectDetail | null;
 }
 
-export default function ProjectDetailClient({ project, prev, next, detail: remoteDetail }: ProjectDetailClientProps) {
-  const detail = remoteDetail ?? projectDetails[project.slug] ?? projectDetails['cipher-shield'];
+export default function ProjectDetailClient({
+  project,
+  prev,
+  next,
+  detail: remoteDetail,
+}: ProjectDetailClientProps) {
+  const detail = remoteDetail ?? projectDetails[project.slug] ?? null;
   const { heroRef, contentRef } = useProjectDetailAnimations(project.slug);
 
   return (
@@ -86,24 +92,41 @@ export default function ProjectDetailClient({ project, prev, next, detail: remot
             </div>
           </div>
 
-          <div className="detail-hero-visual rounded-2xl border border-border bg-surface p-6">
-            <div className="mb-6 flex items-center gap-2 border-b border-border pb-4">
-              <span className="h-2.5 w-2.5 rounded-full bg-danger" />
-              <span className="h-2.5 w-2.5 rounded-full bg-warning" />
-              <span className="h-2.5 w-2.5 rounded-full bg-accent" />
-              <span className="ml-3 font-mono text-xs text-text-dim">project.metrics</span>
+          <div className="detail-hero-visual overflow-hidden rounded-2xl border border-border bg-surface">
+            {project.coverImage && (
+              <div className="relative aspect-[16/9] w-full">
+                <Image
+                  src={project.coverImage}
+                  alt={`${project.title} project cover`}
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <div className="p-6">
+              <div className="mb-6 flex items-center gap-2 border-b border-border pb-4">
+                <span className="h-2.5 w-2.5 rounded-full bg-danger" />
+                <span className="h-2.5 w-2.5 rounded-full bg-warning" />
+                <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+                <span className="ml-3 font-mono text-xs text-text-dim">project.metrics</span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {project.metrics.map((metric) => (
+                  <div key={metric.label} className="rounded-xl border border-border bg-bg p-4">
+                    <strong
+                      className="block font-display text-2xl"
+                      style={{ color: project.color }}
+                    >
+                      {metric.value}
+                    </strong>
+                    <span className="font-mono text-[10px] text-text-dim">{metric.label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-6 leading-relaxed text-text-secondary">{project.description}</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {project.metrics.map((metric) => (
-                <div key={metric.label} className="rounded-xl border border-border bg-bg p-4">
-                  <strong className="block font-display text-2xl" style={{ color: project.color }}>
-                    {metric.value}
-                  </strong>
-                  <span className="font-mono text-[10px] text-text-dim">{metric.label}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-6 leading-relaxed text-text-secondary">{project.description}</p>
           </div>
         </div>
       </header>
@@ -130,52 +153,56 @@ export default function ProjectDetailClient({ project, prev, next, detail: remot
           </div>
         </section>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          <DetailBlock label="// the challenge" text={detail.challenge} color="#FF3B6B" />
-          <DetailBlock label="// the solution" text={detail.solution} color="#00D4FF" />
-        </div>
+        {detail && (
+          <>
+            <div className="grid gap-8 md:grid-cols-2">
+              <DetailBlock label="// the challenge" text={detail.challenge} color="#FF3B6B" />
+              <DetailBlock label="// the solution" text={detail.solution} color="#00D4FF" />
+            </div>
 
-        <section className="scroll-reveal rounded-2xl border border-accent/20 bg-accent/[0.04] p-8">
-          <p className="mb-3 font-mono text-xs text-accent">// measurable impact</p>
-          <p className="text-2xl font-medium leading-relaxed">{detail.impact}</p>
-          <dl className="mt-8 grid gap-4 sm:grid-cols-3">
-            {[
-              ['Timeline', detail.timeline],
-              ['Team', detail.teamSize],
-              ['Role', detail.role],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <dt className="font-mono text-[10px] text-text-dim">{label}</dt>
-                <dd className="mt-1 text-sm text-text-secondary">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
+            <section className="scroll-reveal rounded-2xl border border-accent/20 bg-accent/[0.04] p-8">
+              <p className="mb-3 font-mono text-xs text-accent">// measurable impact</p>
+              <p className="text-2xl font-medium leading-relaxed">{detail.impact}</p>
+              <dl className="mt-8 grid gap-4 sm:grid-cols-3">
+                {[
+                  ['Timeline', detail.timeline],
+                  ['Team', detail.teamSize],
+                  ['Role', detail.role],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="font-mono text-[10px] text-text-dim">{label}</dt>
+                    <dd className="mt-1 text-sm text-text-secondary">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
 
-        <section className="scroll-reveal">
-          <p className="mb-5 font-mono text-xs" style={{ color: project.color }}>
-            // key highlights
-          </p>
-          <ul className="grid list-none gap-4 sm:grid-cols-2">
-            {detail.highlights.map((highlight) => (
-              <li key={highlight} className="rounded-xl border border-border bg-surface p-5">
-                <span className="mr-3" style={{ color: project.color }}>
-                  ◆
-                </span>
-                {highlight}
-              </li>
-            ))}
-          </ul>
-        </section>
+            <section className="scroll-reveal">
+              <p className="mb-5 font-mono text-xs" style={{ color: project.color }}>
+                // key highlights
+              </p>
+              <ul className="grid list-none gap-4 sm:grid-cols-2">
+                {detail.highlights.map((highlight) => (
+                  <li key={highlight} className="rounded-xl border border-border bg-surface p-5">
+                    <span className="mr-3" style={{ color: project.color }}>
+                      ◆
+                    </span>
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-        <section className="scroll-reveal">
-          <p className="mb-5 font-mono text-xs" style={{ color: project.color }}>
-            // implementation sample
-          </p>
-          <pre className="overflow-x-auto rounded-2xl border border-border bg-[#030709] p-6 text-sm leading-relaxed text-text-secondary">
-            <code>{detail.codeSnippet}</code>
-          </pre>
-        </section>
+            <section className="scroll-reveal">
+              <p className="mb-5 font-mono text-xs" style={{ color: project.color }}>
+                // implementation sample
+              </p>
+              <pre className="overflow-x-auto rounded-2xl border border-border bg-[#030709] p-6 text-sm leading-relaxed text-text-secondary">
+                <code>{detail.codeSnippet}</code>
+              </pre>
+            </section>
+          </>
+        )}
 
         <nav
           className="grid gap-4 border-t border-border pt-10 sm:grid-cols-2"

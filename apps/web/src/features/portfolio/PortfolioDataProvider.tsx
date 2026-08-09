@@ -1,10 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { projects as fallbackProjects } from '@/data/projects';
-import { experience as fallbackExperience } from '@/data/home';
-import { skills as fallbackSkills } from '@/data/skills';
 import type { Project } from '@/types/project';
+import { getProjectImageUrl } from './project-image';
 
 interface ExperienceItem {
   role: string;
@@ -45,6 +43,7 @@ interface ApiProject {
   github_url: string;
   metrics: Array<{ label: string; value: string }>;
   featured: boolean;
+  cover_image_path?: string | null;
 }
 
 interface ApiPortfolio {
@@ -56,16 +55,31 @@ interface ApiPortfolio {
 }
 
 const fallbackSocials: SocialItem[] = [
-  { label: 'GitHub', handle: '@Alisher0903', href: 'https://github.com/Alisher0903', color: '#E8F4FD' },
-  { label: 'LinkedIn', handle: 'in/alisher-sodiqov-491183310', href: 'https://www.linkedin.com/in/alisher-sodiqov-491183310', color: '#0A66C2' },
+  {
+    label: 'GitHub',
+    handle: '@Alisher0903',
+    href: 'https://github.com/Alisher0903',
+    color: '#E8F4FD',
+  },
+  {
+    label: 'LinkedIn',
+    handle: 'in/alisher-sodiqov',
+    href: 'https://www.linkedin.com/in/alisher-sodiqov',
+    color: '#0A66C2',
+  },
   { label: 'Twitter', handle: '@ascyber777', href: 'https://x.com/ascyber777', color: '#1DA1F2' },
-  { label: 'Email', handle: 'info@alisherdev.uz', href: 'mailto:info@alisherdev.uz', color: '#00FF87' },
+  {
+    label: 'Email',
+    handle: 'info@alisherdev.uz',
+    href: 'mailto:info@alisherdev.uz',
+    color: '#00FF87',
+  },
 ];
 
 const initialData: PortfolioData = {
-  projects: fallbackProjects,
-  experience: [...fallbackExperience],
-  skills: fallbackSkills,
+  projects: [],
+  experience: [],
+  skills: {},
   socials: fallbackSocials,
   settings: {},
   isRemote: false,
@@ -75,6 +89,15 @@ const PortfolioContext = createContext<PortfolioData>(initialData);
 
 export function PortfolioDataProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<PortfolioData>(initialData);
+
+  useEffect(() => {
+    try {
+      const cached = window.localStorage.getItem('portfolio:last-known-good');
+      if (cached) setData(JSON.parse(cached) as PortfolioData);
+    } catch {
+      // Ignore invalid or unavailable browser storage.
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -102,19 +125,24 @@ export function PortfolioDataProvider({ children }: { children: React.ReactNode 
           github: project.github_url,
           metrics: project.metrics,
           featured: project.featured,
+          coverImage: getProjectImageUrl(project.cover_image_path),
         }));
-        const skills = Object.fromEntries(remote.skills.map((category) => [category.name, category.skills]));
-        setData({
-          projects: projects.length ? projects : fallbackProjects,
-          experience: remote.experiences.length ? remote.experiences : [...fallbackExperience],
-          skills: remote.skills.length ? skills : fallbackSkills,
+        const skills = Object.fromEntries(
+          remote.skills.map((category) => [category.name, category.skills]),
+        );
+        const nextData: PortfolioData = {
+          projects,
+          experience: remote.experiences,
+          skills,
           socials: remote.socials.length ? remote.socials : fallbackSocials,
           settings: remote.settings ?? {},
           isRemote: true,
-        });
+        };
+        setData(nextData);
+        window.localStorage.setItem('portfolio:last-known-good', JSON.stringify(nextData));
       })
       .catch(() => {
-        // Static data remains available when the free Supabase project is paused or offline.
+        // Keep the last successfully fetched response; never replace it with unrelated demo data.
       });
 
     return () => controller.abort();
