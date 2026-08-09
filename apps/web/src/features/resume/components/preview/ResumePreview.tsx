@@ -7,6 +7,11 @@ interface Props {
   forExport?: boolean;
 }
 
+function normalizeLink(value: string, scheme = 'https://') {
+  if (/^[a-z][a-z\d+.-]*:/i.test(value)) return value;
+  return `${scheme}${value}`;
+}
+
 export default function ResumePreview({ data, scale = 1, forExport = false }: Props) {
   const theme = themeColors[data.colorTheme];
   const isMin = data.layoutStyle === 'minimal';
@@ -77,6 +82,11 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
           {h.trim()}
         </li>
       ));
+
+  const linkStyle: React.CSSProperties = {
+    color: theme.primary,
+    textDecoration: 'none',
+  };
 
   return (
     <div id="resume-preview" style={containerStyle}>
@@ -154,13 +164,21 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
             {data.email && (
               <div>
                 {isTerm && <span style={{ color: theme.dim }}>email: </span>}
-                {data.email}
+                <a data-pdf-link href={`mailto:${data.email}`} style={linkStyle}>
+                  {data.email}
+                </a>
               </div>
             )}
             {data.phone && (
               <div>
                 {isTerm && <span style={{ color: theme.dim }}>tel: </span>}
-                {data.phone}
+                <a
+                  data-pdf-link
+                  href={`tel:${data.phone.replace(/[^+\d]/g, '')}`}
+                  style={linkStyle}
+                >
+                  {data.phone}
+                </a>
               </div>
             )}
             {data.location && (
@@ -169,8 +187,27 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                 {data.location}
               </div>
             )}
-            {data.website && <div style={{ color: theme.primary }}>{data.website}</div>}
-            {data.github && <div style={{ color: theme.primary }}>{data.github}</div>}
+            {data.website && (
+              <div>
+                <a data-pdf-link href={normalizeLink(data.website)} style={linkStyle}>
+                  {data.website}
+                </a>
+              </div>
+            )}
+            {data.github && (
+              <div>
+                <a data-pdf-link href={normalizeLink(data.github)} style={linkStyle}>
+                  {data.github}
+                </a>
+              </div>
+            )}
+            {data.linkedin && (
+              <div>
+                <a data-pdf-link href={normalizeLink(data.linkedin)} style={linkStyle}>
+                  {data.linkedin}
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -284,7 +321,9 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                       {p.name || 'Project'}
                     </strong>
                     {p.link && (
-                      <span
+                      <a
+                        data-pdf-link
+                        href={normalizeLink(p.link)}
                         style={{
                           fontSize: '0.58rem',
                           color: theme.primary,
@@ -292,7 +331,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                         }}
                       >
                         {p.link}
-                      </span>
+                      </a>
                     )}
                   </div>
                   {p.tech && (

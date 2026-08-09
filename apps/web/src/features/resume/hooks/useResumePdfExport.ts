@@ -60,6 +60,21 @@ export function useResumePdfExport(data: ResumeData) {
 
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
       pdf.addImage(canvas.toDataURL('image/png', 1), 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+
+      const previewRect = element.getBoundingClientRect();
+      element.querySelectorAll<HTMLAnchorElement>('a[data-pdf-link]').forEach((link) => {
+        const rect = link.getBoundingClientRect();
+        const x = ((rect.left - previewRect.left) / previewRect.width) * 210;
+        const y = ((rect.top - previewRect.top) / previewRect.height) * 297;
+        const width = (rect.width / previewRect.width) * 210;
+        const height = (rect.height / previewRect.height) * 297;
+
+        if (width > 0 && height > 0 && x >= 0 && y >= 0 && x < 210 && y < 297) {
+          pdf.link(x, y, Math.min(width, 210 - x), Math.min(height, 297 - y), {
+            url: link.href,
+          });
+        }
+      });
       pdf.save(`${(data.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`);
     } catch (error) {
       console.error('PDF export error:', error);
