@@ -1,8 +1,15 @@
 import { skillCategoryMeta } from './skills.config';
 import { cn } from '@/lib/utils';
 
-export function SkillsPanel({ skills, category }: { skills: Record<string, readonly string[]>; category: string }) {
-  const meta = skillCategoryMeta[category as keyof typeof skillCategoryMeta] ?? skillCategoryMeta.Other;
+export function SkillsPanel({
+  skills,
+  category,
+}: {
+  skills: Record<string, readonly string[]>;
+  category: string;
+}) {
+  const meta =
+    skillCategoryMeta[category as keyof typeof skillCategoryMeta] ?? skillCategoryMeta.Other;
 
   return (
     <div
@@ -31,7 +38,7 @@ export function SkillsPanel({ skills, category }: { skills: Record<string, reado
       </div>
 
       <ul className="grid list-none sm:grid-cols-2 xl:grid-cols-3">
-        {skills[category].map((skill, index) => (
+        {(skills[category] ?? []).map((skill, index) => (
           <li
             key={skill}
             className="group flex min-h-20 items-center gap-4 border-b border-border bg-surface px-5 py-4 transition-colors duration-300 hover:bg-white/[0.02] sm:border-r"

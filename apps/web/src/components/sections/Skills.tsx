@@ -13,6 +13,13 @@ export default function Skills() {
   const { skills } = usePortfolioData();
   const sectionRef = useRef<HTMLElement>(null);
   const [activeCategory, setActiveCategory] = useState('Frontend');
+  const categories = Object.keys(skills);
+
+  useEffect(() => {
+    if (categories.length > 0 && !skills[activeCategory]) {
+      setActiveCategory(categories[0]);
+    }
+  }, [activeCategory, categories, skills]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -31,6 +38,8 @@ export default function Skills() {
 
     return () => ctx.revert();
   }, []);
+
+  if (categories.length === 0) return null;
 
   return (
     <section id="skills" ref={sectionRef} className="bg-bg py-16 md:py-32">
