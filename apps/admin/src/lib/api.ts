@@ -16,8 +16,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(body?.error ?? `Request failed (${response.status})`);
+    const body = (await response.json().catch(() => null)) as {
+      error?: string;
+      issues?: Array<{ path?: Array<string | number>; message?: string }>;
+    } | null;
+    const issue = body?.issues?.[0];
+    const issueMessage = issue?.message
+      ? `${issue.path?.join('.') || 'Field'}: ${issue.message}`
+      : null;
+    throw new Error(issueMessage ?? body?.error ?? `Request failed (${response.status})`);
   }
 
   if (response.status === 204) return undefined as T;
@@ -33,8 +40,7 @@ export const adminApi = {
       method: 'PATCH',
       body: JSON.stringify(project),
     }),
-  deleteProject: (id: string) =>
-    request<void>(`/admin/projects/${id}`, { method: 'DELETE' }),
+  deleteProject: (id: string) => request<void>(`/admin/projects/${id}`, { method: 'DELETE' }),
   projectDetail: (id: string) => request<AdminProjectDetail | null>(`/admin/projects/${id}/detail`),
   saveProjectDetail: (id: string, detail: ProjectDetailInput) =>
     request<AdminProjectDetail>(`/admin/projects/${id}/detail`, {

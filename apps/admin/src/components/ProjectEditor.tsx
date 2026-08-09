@@ -29,9 +29,24 @@ interface Props {
 }
 
 const emptyDetail: ProjectDetailInput = {
-  challenge: '', solution: '', impact: '', timeline: '', team_size: '', role: '',
-  highlights: [], code_snippet: '',
+  challenge: '',
+  solution: '',
+  impact: '',
+  timeline: '',
+  team_size: '',
+  role: '',
+  highlights: [],
+  code_snippet: '',
 };
+
+function slugify(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 export default function ProjectEditor({ project, onClose, onSave }: Props) {
   const [value, setValue] = useState<ProjectInput>(project ?? emptyProject);
@@ -41,11 +56,17 @@ export default function ProjectEditor({ project, onClose, onSave }: Props) {
   const [highlights, setHighlights] = useState('');
   const [metrics, setMetrics] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [slugEdited, setSlugEdited] = useState(Boolean(project?.slug));
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setValue(project ?? emptyProject);
+    setSlugEdited(Boolean(project?.slug));
+    setError('');
     setTech(project?.tech.join(', ') ?? '');
-    setMetrics(project?.metrics.map((metric) => `${metric.label}: ${metric.value}`).join('\n') ?? '');
+    setMetrics(
+      project?.metrics.map((metric) => `${metric.label}: ${metric.value}`).join('\n') ?? '',
+    );
     if (project) {
       adminApi.projectDetail(project.id).then((result) => {
         const next = result ?? emptyDetail;
@@ -61,25 +82,56 @@ export default function ProjectEditor({ project, onClose, onSave }: Props) {
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
-    await onSave(
-      {
-        ...value,
-        tech: tech.split(',').map((item) => item.trim()).filter(Boolean),
-        metrics: metrics.split('\n').map((line) => {
-          const separator = line.indexOf(':');
-          return separator > 0
-            ? { label: line.slice(0, separator).trim(), value: line.slice(separator + 1).trim() }
-            : null;
-        }).filter((item): item is { label: string; value: string } => Boolean(item?.label && item.value)),
-      },
-      { ...detail, highlights: highlights.split('\n').map((item) => item.trim()).filter(Boolean) },
-    ).finally(() => setSaving(false));
+    setError('');
+    try {
+      await onSave(
+        {
+          ...value,
+          slug: slugify(value.slug || value.title),
+          tech: tech
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean),
+          metrics: metrics
+            .split('\n')
+            .map((line) => {
+              const separator = line.indexOf(':');
+              return separator > 0
+                ? {
+                    label: line.slice(0, separator).trim(),
+                    value: line.slice(separator + 1).trim(),
+                  }
+                : null;
+            })
+            .filter((item): item is { label: string; value: string } =>
+              Boolean(item?.label && item.value),
+            ),
+        },
+        {
+          ...detail,
+          highlights: highlights
+            .split('\n')
+            .map((item) => item.trim())
+            .filter(Boolean),
+        },
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not save project');
+    } finally {
+      setSaving(false);
+    }
   }
 
   const field = (key: keyof ProjectInput, next: string | boolean | number) =>
     setValue((current) => ({ ...current, [key]: next }));
   const detailField = (key: keyof ProjectDetailInput, next: string) =>
     setDetail((current) => ({ ...current, [key]: next }));
+  const updateTitle = (title: string) =>
+    setValue((current) => ({
+      ...current,
+      title,
+      slug: slugEdited ? current.slug : slugify(title),
+    }));
 
   async function uploadCover(file: File) {
     if (!supabase) return;
@@ -102,39 +154,191 @@ export default function ProjectEditor({ project, onClose, onSave }: Props) {
             <p className="eyebrow">{project ? 'EDIT PROJECT' : 'NEW PROJECT'}</p>
             <h2>{project?.title || 'Untitled project'}</h2>
           </div>
-          <button className="icon-button" onClick={onClose} aria-label="Close">×</button>
+          <button className="icon-button" onClick={onClose} aria-label="Close">
+            ×
+          </button>
         </header>
         <form onSubmit={submit}>
+          {error ? <div className="error">{error}</div> : null}
           <div className="form-grid">
-            <label><span>Title</span><input required value={value.title} onChange={(e) => field('title', e.target.value)} /></label>
-            <label><span>Slug</span><input required pattern="[a-z0-9-]+" value={value.slug} onChange={(e) => field('slug', e.target.value)} /></label>
-            <label className="wide"><span>Subtitle</span><input value={value.subtitle} onChange={(e) => field('subtitle', e.target.value)} /></label>
-            <label className="wide"><span>Description</span><textarea rows={5} value={value.description} onChange={(e) => field('description', e.target.value)} /></label>
-            <label><span>Category</span><input value={value.category} onChange={(e) => field('category', e.target.value)} /></label>
-            <label><span>Year</span><input value={value.year} onChange={(e) => field('year', e.target.value)} /></label>
-            <label className="wide"><span>Technologies — comma separated</span><input value={tech} onChange={(e) => setTech(e.target.value)} /></label>
-            <label><span>Live URL</span><input value={value.live_url} onChange={(e) => field('live_url', e.target.value)} /></label>
-            <label><span>GitHub URL</span><input value={value.github_url} onChange={(e) => field('github_url', e.target.value)} /></label>
-            <label className="wide"><span>Metrics — “Label: Value”, one per line</span><textarea rows={4} value={metrics} onChange={(e) => setMetrics(e.target.value)} /></label>
-            <label className="wide"><span>Cover image {uploading ? '— uploading…' : ''}</span><input type="file" accept="image/png,image/jpeg,image/webp,image/avif" onChange={(e) => e.target.files?.[0] && void uploadCover(e.target.files[0])} />{value.cover_image_path ? <small className="upload-path">{value.cover_image_path}</small> : null}</label>
-            <label><span>Primary color</span><input type="color" value={value.color} onChange={(e) => field('color', e.target.value)} /></label>
-            <label><span>Accent color</span><input type="color" value={value.accent_color} onChange={(e) => field('accent_color', e.target.value)} /></label>
-            <label><span>Status</span><select value={value.status} onChange={(e) => field('status', e.target.value)}><option value="draft">Draft</option><option value="published">Published</option></select></label>
-            <label><span>Sort order</span><input type="number" min="0" value={value.sort_order} onChange={(e) => field('sort_order', Number(e.target.value))} /></label>
-            <div className="wide form-divider"><span>PROJECT CASE STUDY</span></div>
-            <label className="wide"><span>Challenge</span><textarea rows={4} value={detail.challenge} onChange={(e) => detailField('challenge', e.target.value)} /></label>
-            <label className="wide"><span>Solution</span><textarea rows={4} value={detail.solution} onChange={(e) => detailField('solution', e.target.value)} /></label>
-            <label className="wide"><span>Impact</span><textarea rows={3} value={detail.impact} onChange={(e) => detailField('impact', e.target.value)} /></label>
-            <label><span>Timeline</span><input value={detail.timeline} onChange={(e) => detailField('timeline', e.target.value)} /></label>
-            <label><span>Team size</span><input value={detail.team_size} onChange={(e) => detailField('team_size', e.target.value)} /></label>
-            <label className="wide"><span>Role</span><input value={detail.role} onChange={(e) => detailField('role', e.target.value)} /></label>
-            <label className="wide"><span>Highlights — one per line</span><textarea rows={5} value={highlights} onChange={(e) => setHighlights(e.target.value)} /></label>
-            <label className="wide"><span>Code snippet</span><textarea rows={9} value={detail.code_snippet} onChange={(e) => detailField('code_snippet', e.target.value)} spellCheck={false} /></label>
+            <label>
+              <span>Title</span>
+              <input required value={value.title} onChange={(e) => updateTitle(e.target.value)} />
+            </label>
+            <label>
+              <span>Slug</span>
+              <input
+                required
+                pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                title="Lowercase letters, numbers, and single hyphens only"
+                value={value.slug}
+                onChange={(e) => {
+                  setSlugEdited(true);
+                  field('slug', slugify(e.target.value));
+                }}
+              />
+              <small className="upload-path">URL: /projects/{value.slug || 'project-slug'}</small>
+            </label>
+            <label className="wide">
+              <span>Subtitle</span>
+              <input value={value.subtitle} onChange={(e) => field('subtitle', e.target.value)} />
+            </label>
+            <label className="wide">
+              <span>Description</span>
+              <textarea
+                rows={5}
+                value={value.description}
+                onChange={(e) => field('description', e.target.value)}
+              />
+            </label>
+            <label>
+              <span>Category</span>
+              <input value={value.category} onChange={(e) => field('category', e.target.value)} />
+            </label>
+            <label>
+              <span>Year</span>
+              <input value={value.year} onChange={(e) => field('year', e.target.value)} />
+            </label>
+            <label className="wide">
+              <span>Technologies — comma separated</span>
+              <input value={tech} onChange={(e) => setTech(e.target.value)} />
+            </label>
+            <label>
+              <span>Live URL</span>
+              <input value={value.live_url} onChange={(e) => field('live_url', e.target.value)} />
+            </label>
+            <label>
+              <span>GitHub URL</span>
+              <input
+                value={value.github_url}
+                onChange={(e) => field('github_url', e.target.value)}
+              />
+            </label>
+            <label className="wide">
+              <span>Metrics — “Label: Value”, one per line</span>
+              <textarea rows={4} value={metrics} onChange={(e) => setMetrics(e.target.value)} />
+            </label>
+            <label className="wide">
+              <span>Cover image {uploading ? '— uploading…' : ''}</span>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/avif"
+                onChange={(e) => e.target.files?.[0] && void uploadCover(e.target.files[0])}
+              />
+              {value.cover_image_path ? (
+                <small className="upload-path">{value.cover_image_path}</small>
+              ) : null}
+            </label>
+            <label>
+              <span>Primary color</span>
+              <input
+                type="color"
+                value={value.color}
+                onChange={(e) => field('color', e.target.value)}
+              />
+            </label>
+            <label>
+              <span>Accent color</span>
+              <input
+                type="color"
+                value={value.accent_color}
+                onChange={(e) => field('accent_color', e.target.value)}
+              />
+            </label>
+            <label>
+              <span>Status</span>
+              <select value={value.status} onChange={(e) => field('status', e.target.value)}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </label>
+            <label>
+              <span>Sort order</span>
+              <input
+                type="number"
+                min="0"
+                value={value.sort_order}
+                onChange={(e) => field('sort_order', Number(e.target.value))}
+              />
+            </label>
+            <div className="wide form-divider">
+              <span>PROJECT CASE STUDY</span>
+            </div>
+            <label className="wide">
+              <span>Challenge</span>
+              <textarea
+                rows={4}
+                value={detail.challenge}
+                onChange={(e) => detailField('challenge', e.target.value)}
+              />
+            </label>
+            <label className="wide">
+              <span>Solution</span>
+              <textarea
+                rows={4}
+                value={detail.solution}
+                onChange={(e) => detailField('solution', e.target.value)}
+              />
+            </label>
+            <label className="wide">
+              <span>Impact</span>
+              <textarea
+                rows={3}
+                value={detail.impact}
+                onChange={(e) => detailField('impact', e.target.value)}
+              />
+            </label>
+            <label>
+              <span>Timeline</span>
+              <input
+                value={detail.timeline}
+                onChange={(e) => detailField('timeline', e.target.value)}
+              />
+            </label>
+            <label>
+              <span>Team size</span>
+              <input
+                value={detail.team_size}
+                onChange={(e) => detailField('team_size', e.target.value)}
+              />
+            </label>
+            <label className="wide">
+              <span>Role</span>
+              <input value={detail.role} onChange={(e) => detailField('role', e.target.value)} />
+            </label>
+            <label className="wide">
+              <span>Highlights — one per line</span>
+              <textarea
+                rows={5}
+                value={highlights}
+                onChange={(e) => setHighlights(e.target.value)}
+              />
+            </label>
+            <label className="wide">
+              <span>Code snippet</span>
+              <textarea
+                rows={9}
+                value={detail.code_snippet}
+                onChange={(e) => detailField('code_snippet', e.target.value)}
+                spellCheck={false}
+              />
+            </label>
           </div>
-          <label className="check"><input type="checkbox" checked={value.featured} onChange={(e) => field('featured', e.target.checked)} /> Featured project</label>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={value.featured}
+              onChange={(e) => field('featured', e.target.checked)}
+            />{' '}
+            Featured project
+          </label>
           <footer>
-            <button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
-            <button className="primary-button" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
+            <button type="button" className="secondary-button" onClick={onClose}>
+              Cancel
+            </button>
+            <button className="primary-button" disabled={saving}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
           </footer>
         </form>
       </aside>
