@@ -64,7 +64,7 @@ export function ResumeToolbar({
             disabled={exporting}
             className="rounded-md border border-accent bg-accent px-2.5 py-1.5 font-mono text-[11px] font-semibold text-bg disabled:opacity-70"
           >
-            {exporting ? 'Exporting...' : '↓ Export PDF'}
+            {exporting ? 'Opening…' : '↓ Export PDF'}
           </button>
         </div>
       </header>

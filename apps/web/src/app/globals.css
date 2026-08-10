@@ -388,6 +388,11 @@ a:focus-visible {
     z-index: 99999;
   }
 
+  #print-root a {
+    color: inherit;
+    text-decoration: none;
+  }
+
   /* Reset resume preview for print */
   #resume-preview {
     transform: none !important;
