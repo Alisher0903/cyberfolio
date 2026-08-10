@@ -9,14 +9,18 @@ import { ProjectsEditor } from './editors/ProjectsEditor';
 import { SkillsEditor } from './editors/SkillsEditor';
 import { StyleEditor } from './editors/StyleEditor';
 import { WorkEditor } from './editors/WorkEditor';
+import { TrainingEditor } from './editors/TrainingEditor';
+import { LanguagesEditor } from './editors/LanguagesEditor';
 import { cn } from '@/lib/utils';
 
 const editors: Record<ResumeTab, React.ComponentType> = {
   personal: PersonalEditor,
   work: WorkEditor,
   education: EducationEditor,
+  training: TrainingEditor,
   projects: ProjectsEditor,
   skills: SkillsEditor,
+  languages: LanguagesEditor,
   style: StyleEditor,
 };
 

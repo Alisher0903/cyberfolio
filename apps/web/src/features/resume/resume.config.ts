@@ -5,8 +5,10 @@ export const resumeTabs: Array<{ id: ResumeTab; label: string; icon: string }> =
   { id: 'personal', label: 'Personal', icon: '◈' },
   { id: 'work', label: 'Work', icon: '◉' },
   { id: 'education', label: 'Education', icon: '◆' },
+  { id: 'training', label: 'Training', icon: '▣' },
   { id: 'projects', label: 'Projects', icon: '⬡' },
   { id: 'skills', label: 'Skills', icon: '◇' },
+  { id: 'languages', label: 'Languages', icon: '◎' },
   { id: 'style', label: 'Style', icon: '✦' },
 ];
 

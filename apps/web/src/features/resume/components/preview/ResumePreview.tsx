@@ -355,6 +355,54 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
               ))}
             </Section>
           )}
+
+          {/* Training and short courses */}
+          {data.trainings.length > 0 && (
+            <Section title="Training">
+              {data.trainings.map((training) => (
+                <div key={training.id} style={{ marginBottom: '0.8rem' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'baseline',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <strong style={{ fontSize: '0.7rem', color: isTerm ? '#E8F4FD' : '#111' }}>
+                      {training.course || 'Course / Program'}
+                    </strong>
+                    <span
+                      style={{
+                        fontSize: '0.6rem',
+                        color: isTerm ? '#3A5568' : '#888',
+                        fontFamily: "'JetBrains Mono',monospace",
+                      }}
+                    >
+                      {training.period}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.63rem', color: theme.primary }}>
+                    {training.provider}
+                  </div>
+                  {training.credential &&
+                    (/^https?:\/\//i.test(training.credential) ? (
+                      <a
+                        data-pdf-link
+                        href={training.credential}
+                        style={{ ...linkStyle, fontSize: '0.58rem' }}
+                      >
+                        Credential ↗
+                      </a>
+                    ) : (
+                      <div style={{ fontSize: '0.58rem', color: isTerm ? '#7FA8C4' : '#666' }}>
+                        {training.credential}
+                      </div>
+                    ))}
+                </div>
+              ))}
+            </Section>
+          )}
         </div>
 
         {/* Side column */}
@@ -411,6 +459,28 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                         </span>
                       ))}
                   </div>
+                </div>
+              ))}
+            </Section>
+          )}
+
+          {/* Languages */}
+          {data.languages.length > 0 && (
+            <Section title="Languages">
+              {data.languages.map((item) => (
+                <div key={item.id} style={{ marginBottom: '0.55rem' }}>
+                  <strong
+                    style={{
+                      display: 'block',
+                      fontSize: '0.65rem',
+                      color: isTerm ? '#E8F4FD' : '#111',
+                    }}
+                  >
+                    {item.language || 'Language'}
+                  </strong>
+                  <span style={{ fontSize: '0.6rem', color: theme.primary }}>
+                    {item.proficiency}
+                  </span>
                 </div>
               ))}
             </Section>

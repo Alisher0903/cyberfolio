@@ -1,1 +1,9 @@
-export type ResumeTab = 'personal' | 'work' | 'education' | 'projects' | 'skills' | 'style';
+export type ResumeTab =
+  | 'personal'
+  | 'work'
+  | 'education'
+  | 'training'
+  | 'projects'
+  | 'skills'
+  | 'languages'
+  | 'style';

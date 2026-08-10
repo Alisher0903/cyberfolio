@@ -31,6 +31,18 @@ export interface SkillGroup {
   category: string;
   skills: string;
 }
+export interface TrainingItem {
+  id: string;
+  course: string;
+  provider: string;
+  period: string;
+  credential?: string;
+}
+export interface LanguageItem {
+  id: string;
+  language: string;
+  proficiency: string;
+}
 
 export interface ResumeData {
   // Personal
@@ -48,6 +60,8 @@ export interface ResumeData {
   education: EduItem[];
   projects: ProjectItem[];
   skillGroups: SkillGroup[];
+  trainings: TrainingItem[];
+  languages: LanguageItem[];
   // Style
   colorTheme: ColorTheme;
   layoutStyle: LayoutStyle;
@@ -107,6 +121,8 @@ const defaultData: ResumeData = {
     { id: 's2', category: 'Security', skills: 'OWASP, Burp Suite, Pentesting, CTF' },
     { id: 's3', category: 'Backend', skills: 'Node.js, Python, PostgreSQL, Redis' },
   ],
+  trainings: [],
+  languages: [{ id: 'l1', language: 'English', proficiency: 'Professional working proficiency' }],
   colorTheme: 'green',
   layoutStyle: 'modern',
   showPhoto: false,
@@ -127,6 +143,12 @@ interface ResumeStore {
   updateSkillGroup: (id: string, partial: Partial<SkillGroup>) => void;
   addSkillGroup: () => void;
   removeSkillGroup: (id: string) => void;
+  updateTraining: (id: string, partial: Partial<TrainingItem>) => void;
+  addTraining: () => void;
+  removeTraining: (id: string) => void;
+  updateLanguage: (id: string, partial: Partial<LanguageItem>) => void;
+  addLanguage: () => void;
+  removeLanguage: (id: string) => void;
   reset: () => void;
 }
 
@@ -210,9 +232,66 @@ export const useResumeStore = create<ResumeStore>()(
           data: { ...s.data, skillGroups: s.data.skillGroups.filter((sg) => sg.id !== id) },
         })),
 
+      updateTraining: (id, p) =>
+        set((s) => ({
+          data: {
+            ...s.data,
+            trainings: s.data.trainings.map((item) => (item.id === id ? { ...item, ...p } : item)),
+          },
+        })),
+      addTraining: () =>
+        set((s) => ({
+          data: {
+            ...s.data,
+            trainings: [
+              ...s.data.trainings,
+              { id: uid(), course: '', provider: '', period: '', credential: '' },
+            ],
+          },
+        })),
+      removeTraining: (id) =>
+        set((s) => ({
+          data: { ...s.data, trainings: s.data.trainings.filter((item) => item.id !== id) },
+        })),
+
+      updateLanguage: (id, p) =>
+        set((s) => ({
+          data: {
+            ...s.data,
+            languages: s.data.languages.map((item) => (item.id === id ? { ...item, ...p } : item)),
+          },
+        })),
+      addLanguage: () =>
+        set((s) => ({
+          data: {
+            ...s.data,
+            languages: [...s.data.languages, { id: uid(), language: '', proficiency: '' }],
+          },
+        })),
+      removeLanguage: (id) =>
+        set((s) => ({
+          data: { ...s.data, languages: s.data.languages.filter((item) => item.id !== id) },
+        })),
+
       reset: () => set({ data: defaultData }),
     }),
-    { name: 'portfolio-resume-v2', version: 2 },
+    {
+      name: 'portfolio-resume-v2',
+      version: 3,
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<ResumeStore> | undefined;
+        return {
+          ...current,
+          ...saved,
+          data: {
+            ...current.data,
+            ...saved?.data,
+            trainings: saved?.data?.trainings ?? [],
+            languages: saved?.data?.languages ?? [],
+          },
+        };
+      },
+    },
   ),
 );
 
