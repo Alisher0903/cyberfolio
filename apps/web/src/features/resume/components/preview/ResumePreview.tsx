@@ -472,11 +472,11 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                   key={item.id}
                   style={{
                     display: 'inline-flex',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '0.35rem',
-                    marginRight: '0.7rem',
-                    marginBottom: '0.35rem',
+                    alignItems: 'baseline',
+                    gap: '0.25rem',
+                    marginRight: '0.8rem',
+                    marginBottom: '0.3rem',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <strong
@@ -487,16 +487,14 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                   >
                     {item.language || 'Language'}
                   </strong>
-                  <span style={{ fontSize: '0.58rem', color: isTerm ? '#3A5568' : '#999' }}>—</span>
+                  <span style={{ fontSize: '0.58rem', color: isTerm ? '#3A5568' : '#999' }}>
+                    {isTerm ? ':' : isMin ? '—' : '·'}
+                  </span>
                   <span
                     style={{
-                      fontSize: '0.56rem',
+                      fontSize: '0.6rem',
                       color: isMin ? '#555' : theme.primary,
-                      border: isMin ? 'none' : `1px solid ${theme.primary}35`,
-                      background: isMin ? 'transparent' : theme.bg,
-                      borderRadius: isMin ? '0' : '999px',
-                      padding: isMin ? '0' : '1px 6px',
-                      whiteSpace: 'nowrap',
+                      fontFamily: isTerm ? "'JetBrains Mono',monospace" : undefined,
                     }}
                   >
                     {item.proficiency}
