@@ -14,6 +14,8 @@ interface ProjectDetailClientProps {
   detail?: ProjectDetail | null;
 }
 
+const isExternalUrl = (value?: string) => /^https?:\/\/\S+$/i.test(value ?? '');
+
 export default function ProjectDetailClient({
   project,
   prev,
@@ -76,19 +78,27 @@ export default function ProjectDetailClient({
               ))}
             </div>
             <div className="flex gap-3">
-              <a
-                href={project.link}
-                className="rounded px-5 py-2.5 font-mono text-sm font-semibold text-bg"
-                style={{ backgroundColor: project.color }}
-              >
-                Live demo ↗
-              </a>
-              <a
-                href={project.github}
-                className="rounded border border-border px-5 py-2.5 font-mono text-sm text-text-secondary"
-              >
-                GitHub ↗
-              </a>
+              {isExternalUrl(project.link) && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded px-5 py-2.5 font-mono text-sm font-semibold text-bg"
+                  style={{ backgroundColor: project.color }}
+                >
+                  Live demo ↗
+                </a>
+              )}
+              {isExternalUrl(project.github) && (
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded border border-border px-5 py-2.5 font-mono text-sm text-text-secondary"
+                >
+                  GitHub ↗
+                </a>
+              )}
             </div>
           </div>
 

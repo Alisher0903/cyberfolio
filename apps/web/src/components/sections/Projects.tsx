@@ -8,6 +8,18 @@ import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
+const isExternalUrl = (value?: string) => /^https?:\/\/\S+$/i.test(value ?? '');
+
+const displayUrl = (value: string) => {
+  if (!isExternalUrl(value)) return 'Project preview';
+  try {
+    const url = new URL(value);
+    return `${url.hostname}${url.pathname === '/' ? '' : url.pathname}`;
+  } catch {
+    return 'Project preview';
+  }
+};
+
 export default function Projects() {
   const { projects } = usePortfolioData();
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -193,46 +205,50 @@ export default function Projects() {
               >
                 Details →
               </Link>
-              <a
-                href={project?.link}
-                aria-label={`Live demo of ${project?.title} (opens in new tab)`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded border transition-all duration-300"
-                style={{ borderColor: '#0E2030', color: '#7FA8C4' }}
-                onMouseEnter={(e) => {
-                  const a = e.currentTarget;
-                  a.style.borderColor = project?.color || '#00FF87';
-                  a.style.color = project?.color || '#00FF87';
-                }}
-                onMouseLeave={(e) => {
-                  const a = e.currentTarget;
-                  a.style.borderColor = '#0E2030';
-                  a.style.color = '#7FA8C4';
-                }}
-              >
-                Live ↗
-              </a>
-              <a
-                href={project?.github}
-                aria-label={`GitHub repository for ${project?.title}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded border transition-all duration-300"
-                style={{ borderColor: '#0E2030', color: '#7FA8C4' }}
-                onMouseEnter={(e) => {
-                  const a = e.currentTarget;
-                  a.style.borderColor = '#0E2030';
-                  a.style.color = '#E8F4FD';
-                }}
-                onMouseLeave={(e) => {
-                  const a = e.currentTarget;
-                  a.style.borderColor = '#0E2030';
-                  a.style.color = '#7FA8C4';
-                }}
-              >
-                GitHub
-              </a>
+              {isExternalUrl(project.link) && (
+                <a
+                  href={project?.link}
+                  aria-label={`Live demo of ${project?.title} (opens in new tab)`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded border transition-all duration-300"
+                  style={{ borderColor: '#0E2030', color: '#7FA8C4' }}
+                  onMouseEnter={(e) => {
+                    const a = e.currentTarget;
+                    a.style.borderColor = project?.color || '#00FF87';
+                    a.style.color = project?.color || '#00FF87';
+                  }}
+                  onMouseLeave={(e) => {
+                    const a = e.currentTarget;
+                    a.style.borderColor = '#0E2030';
+                    a.style.color = '#7FA8C4';
+                  }}
+                >
+                  Live ↗
+                </a>
+              )}
+              {isExternalUrl(project.github) && (
+                <a
+                  href={project?.github}
+                  aria-label={`GitHub repository for ${project?.title}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded border transition-all duration-300"
+                  style={{ borderColor: '#0E2030', color: '#7FA8C4' }}
+                  onMouseEnter={(e) => {
+                    const a = e.currentTarget;
+                    a.style.borderColor = '#0E2030';
+                    a.style.color = '#E8F4FD';
+                  }}
+                  onMouseLeave={(e) => {
+                    const a = e.currentTarget;
+                    a.style.borderColor = '#0E2030';
+                    a.style.color = '#7FA8C4';
+                  }}
+                >
+                  GitHub
+                </a>
+              )}
             </div>
           </div>
 
@@ -260,7 +276,7 @@ export default function Projects() {
                   className="ml-2 flex-1 h-6 rounded font-mono text-xs flex items-center px-3"
                   style={{ backgroundColor: '#050A0E', color: '#3A5568' }}
                 >
-                  https://{project?.slug}.dev
+                  {displayUrl(project.link)}
                 </div>
               </div>
               {project.coverImage ? (
