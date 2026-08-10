@@ -1,11 +1,7 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef, useState } from 'react';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
 import { SiteFooter } from './contact/SiteFooter';
-
-if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
 export default function Contact() {
   const { socials: links, settings } = usePortfolioData();
@@ -15,22 +11,6 @@ export default function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.contact-content',
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          scrollTrigger: { trigger: '.contact-content', start: 'top 80%' },
-        },
-      );
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
