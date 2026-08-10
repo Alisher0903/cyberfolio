@@ -166,6 +166,13 @@ export const resumeDataSchema = z.object({
 export const cloudResumeSchema = z.object({
   key: z.string().min(8).max(128),
   data: resumeDataSchema,
+  updateToken: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .optional(),
 });
 
 export const resumeKeySchema = z.object({ key: z.string().min(8).max(128) });
+export const resumeDeleteSchema = resumeKeySchema.extend({
+  updateToken: z.string().regex(/^[a-f0-9]{64}$/),
+});

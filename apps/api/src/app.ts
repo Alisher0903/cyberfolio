@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import { createHash, createHmac } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { createServiceSupabaseClient } from './database.js';
 import { getEnv } from './env.js';
 import { requireAdmin } from './auth.js';
@@ -17,6 +17,7 @@ import {
   siteSettingSchema,
   cloudResumeSchema,
   resumeKeySchema,
+  resumeDeleteSchema,
 } from './schemas.js';
 import { sendTelegramContactNotification } from './telegram.js';
 
@@ -51,6 +52,16 @@ const resumeKeyHash = (key: string) =>
   createHmac('sha256', getEnv().SUPABASE_SERVICE_ROLE_KEY)
     .update(key.normalize('NFKC'))
     .digest('hex');
+
+const resumeUpdateToken = (id: string, keyHash: string) =>
+  createHmac('sha256', getEnv().SUPABASE_SERVICE_ROLE_KEY)
+    .update(`resume-update:${id}:${keyHash}`)
+    .digest('hex');
+
+const tokensMatch = (actual: string | undefined, expected: string) => {
+  if (!actual || actual.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+};
 
 async function checkResumeRateLimit(context: Context<{ Variables: Variables }>) {
   const forwardedFor = context.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
@@ -158,22 +169,50 @@ app.post('/resumes/save', async (context) => {
   const body = cloudResumeSchema.safeParse(await context.req.json().catch(() => null));
   if (!body.success)
     return context.json({ error: 'Invalid resume', issues: body.error.issues }, 400);
-  const { data, error } = await db()
+  const client = db();
+  const keyHash = resumeKeyHash(body.data.key);
+  const { data: existing, error: readError } = await client
     .from('cloud_resumes')
-    .upsert(
-      {
-        key_hash: resumeKeyHash(body.data.key),
+    .select('id')
+    .eq('key_hash', keyHash)
+    .maybeSingle();
+  if (readError) return context.json({ error: 'Could not save resume' }, 500);
+
+  if (existing) {
+    const expectedToken = resumeUpdateToken(existing.id, keyHash);
+    if (!tokensMatch(body.data.updateToken, expectedToken)) {
+      return context.json(
+        { error: 'This recovery key is already in use. Load the resume first to update it.' },
+        409,
+      );
+    }
+    const { data, error } = await client
+      .from('cloud_resumes')
+      .update({
         name: body.data.data.name,
         title: body.data.data.title,
         data: body.data.data,
         updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'key_hash' },
-    )
+      })
+      .eq('id', existing.id)
+      .select('id,name,title,created_at,updated_at')
+      .single();
+    if (error) return context.json({ error: 'Could not save resume' }, 500);
+    return context.json({ ...data, updateToken: expectedToken });
+  }
+
+  const { data, error } = await client
+    .from('cloud_resumes')
+    .insert({
+      key_hash: keyHash,
+      name: body.data.data.name,
+      title: body.data.data.title,
+      data: body.data.data,
+    })
     .select('id,name,title,created_at,updated_at')
     .single();
   if (error) return context.json({ error: 'Could not save resume' }, 500);
-  return context.json(data, 201);
+  return context.json({ ...data, updateToken: resumeUpdateToken(data.id, keyHash) }, 201);
 });
 
 app.post('/resumes/load', async (context) => {
@@ -192,12 +231,15 @@ app.post('/resumes/load', async (context) => {
   if (!body.success) return context.json({ error: 'Invalid recovery key' }, 400);
   const { data, error } = await db()
     .from('cloud_resumes')
-    .select('data,updated_at')
+    .select('id,data,updated_at')
     .eq('key_hash', resumeKeyHash(body.data.key))
     .maybeSingle();
   if (error) return context.json({ error: 'Could not load resume' }, 500);
   if (!data) return context.json({ error: 'Resume not found' }, 404);
-  return context.json(data);
+  return context.json({
+    ...data,
+    updateToken: resumeUpdateToken(data.id, resumeKeyHash(body.data.key)),
+  });
 });
 
 app.delete('/resumes', async (context) => {
@@ -212,12 +254,22 @@ app.delete('/resumes', async (context) => {
       },
       limit.status,
     );
-  const body = resumeKeySchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid recovery key' }, 400);
-  const { error } = await db()
+  const body = resumeDeleteSchema.safeParse(await context.req.json().catch(() => null));
+  if (!body.success)
+    return context.json({ error: 'Load the resume before deleting its cloud copy' }, 409);
+  const client = db();
+  const keyHash = resumeKeyHash(body.data.key);
+  const { data: existing, error: readError } = await client
     .from('cloud_resumes')
-    .delete()
-    .eq('key_hash', resumeKeyHash(body.data.key));
+    .select('id')
+    .eq('key_hash', keyHash)
+    .maybeSingle();
+  if (readError) return context.json({ error: 'Could not delete resume' }, 500);
+  if (!existing) return context.json({ error: 'Resume not found' }, 404);
+  if (!tokensMatch(body.data.updateToken, resumeUpdateToken(existing.id, keyHash))) {
+    return context.json({ error: 'Load the resume before deleting its cloud copy' }, 409);
+  }
+  const { error } = await client.from('cloud_resumes').delete().eq('id', existing.id);
   if (error) return context.json({ error: 'Could not delete resume' }, 500);
   return context.body(null, 204);
 });

@@ -13,6 +13,7 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
   const { data, update } = useResumeStore();
   const [key, setKey] = useState('');
   const [showKey, setShowKey] = useState(false);
+  const [updateToken, setUpdateToken] = useState<string>();
   const [status, setStatus] = useState<Status>({ kind: 'idle', message: '' });
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,20 +37,25 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
     });
     try {
       if (action === 'save') {
-        await request('/resumes/save', 'POST', { key, data });
+        const payload = (await request('/resumes/save', 'POST', { key, data, updateToken })) as {
+          updateToken?: string;
+        };
+        setUpdateToken(payload.updateToken);
         setStatus({ kind: 'success', message: 'Resume saved to cloud.' });
       } else if (action === 'load') {
         const payload = (await request('/resumes/load', 'POST', { key })) as {
           data: ResumeData;
           updated_at: string;
+          updateToken: string;
         };
         update(payload.data);
+        setUpdateToken(payload.updateToken);
         setStatus({
           kind: 'success',
           message: `Resume restored · ${new Date(payload.updated_at).toLocaleString()}`,
         });
       } else {
-        await request('/resumes', 'DELETE', { key });
+        await request('/resumes', 'DELETE', { key, updateToken });
         setStatus({ kind: 'success', message: 'Cloud copy deleted.' });
       }
     } catch (error) {
@@ -95,7 +101,10 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
             id="resume-recovery-key"
             type={showKey ? 'text' : 'password'}
             value={key}
-            onChange={(event) => setKey(event.target.value)}
+            onChange={(event) => {
+              setKey(event.target.value);
+              setUpdateToken(undefined);
+            }}
             placeholder="At least 8 characters"
             autoComplete="off"
             className="min-w-0 flex-1 rounded-md border border-border bg-bg px-3 py-2.5 text-sm outline-none focus:border-accent/40"
