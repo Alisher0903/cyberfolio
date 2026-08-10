@@ -468,17 +468,35 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
           {data.languages.length > 0 && (
             <Section title="Languages">
               {data.languages.map((item) => (
-                <div key={item.id} style={{ marginBottom: '0.55rem' }}>
+                <div
+                  key={item.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem',
+                    marginBottom: '0.4rem',
+                  }}
+                >
                   <strong
                     style={{
-                      display: 'block',
                       fontSize: '0.65rem',
                       color: isTerm ? '#E8F4FD' : '#111',
                     }}
                   >
                     {item.language || 'Language'}
                   </strong>
-                  <span style={{ fontSize: '0.6rem', color: theme.primary }}>
+                  <span
+                    style={{
+                      fontSize: '0.56rem',
+                      color: theme.primary,
+                      border: `1px solid ${theme.primary}35`,
+                      background: theme.bg,
+                      borderRadius: '999px',
+                      padding: '1px 6px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {item.proficiency}
                   </span>
                 </div>

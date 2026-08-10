@@ -9,8 +9,17 @@ import ProjectEditor from './ProjectEditor';
 import CollectionManager from './CollectionManager';
 import MessagesManager from './MessagesManager';
 import SettingsManager from './SettingsManager';
+import ResumesManager from './ResumesManager';
 
-type Section = 'overview' | 'projects' | 'experiences' | 'skills' | 'socials' | 'messages' | 'settings';
+type Section =
+  | 'overview'
+  | 'projects'
+  | 'experiences'
+  | 'skills'
+  | 'socials'
+  | 'messages'
+  | 'resumes'
+  | 'settings';
 
 export default function AdminShell() {
   const [session, setSession] = useState<Session | null>(null);
@@ -46,7 +55,12 @@ export default function AdminShell() {
     if (session) void loadProjects();
   }, [session, loadProjects]);
 
-  if (!authReady) return <main className="center-screen"><div className="loader" /></main>;
+  if (!authReady)
+    return (
+      <main className="center-screen">
+        <div className="loader" />
+      </main>
+    );
   if (!session) return <LoginScreen />;
 
   async function saveProject(input: ProjectInput, detail: ProjectDetailInput) {
@@ -70,60 +84,180 @@ export default function AdminShell() {
   return (
     <div className="admin-layout">
       <aside className="sidebar">
-        <div className="sidebar-brand"><span>&gt;_</span><div><strong>AlisherDev</strong><small>CONTROL PLANE</small></div></div>
+        <div className="sidebar-brand">
+          <span>&gt;_</span>
+          <div>
+            <strong>AlisherDev</strong>
+            <small>CONTROL PLANE</small>
+          </div>
+        </div>
         <nav>
-          <button className={section === 'overview' ? 'active' : ''} onClick={() => setSection('overview')}><span>⌂</span> Overview</button>
-          <button className={section === 'projects' ? 'active' : ''} onClick={() => setSection('projects')}><span>◉</span> Projects <b>{projects.length}</b></button>
-          <button className={section === 'experiences' ? 'active' : ''} onClick={() => setSection('experiences')}><span>◇</span> Experience</button>
-          <button className={section === 'skills' ? 'active' : ''} onClick={() => setSection('skills')}><span>◆</span> Skills</button>
-          <button className={section === 'socials' ? 'active' : ''} onClick={() => setSection('socials')}><span>↗</span> Social links</button>
-          <button className={section === 'messages' ? 'active' : ''} onClick={() => setSection('messages')}><span>✉</span> Messages</button>
-          <button className={section === 'settings' ? 'active' : ''} onClick={() => setSection('settings')}><span>⚙</span> Site settings</button>
+          <button
+            className={section === 'overview' ? 'active' : ''}
+            onClick={() => setSection('overview')}
+          >
+            <span>⌂</span> Overview
+          </button>
+          <button
+            className={section === 'projects' ? 'active' : ''}
+            onClick={() => setSection('projects')}
+          >
+            <span>◉</span> Projects <b>{projects.length}</b>
+          </button>
+          <button
+            className={section === 'experiences' ? 'active' : ''}
+            onClick={() => setSection('experiences')}
+          >
+            <span>◇</span> Experience
+          </button>
+          <button
+            className={section === 'skills' ? 'active' : ''}
+            onClick={() => setSection('skills')}
+          >
+            <span>◆</span> Skills
+          </button>
+          <button
+            className={section === 'socials' ? 'active' : ''}
+            onClick={() => setSection('socials')}
+          >
+            <span>↗</span> Social links
+          </button>
+          <button
+            className={section === 'messages' ? 'active' : ''}
+            onClick={() => setSection('messages')}
+          >
+            <span>✉</span> Messages
+          </button>
+          <button
+            className={section === 'resumes' ? 'active' : ''}
+            onClick={() => setSection('resumes')}
+          >
+            <span>▤</span> Resumes
+          </button>
+          <button
+            className={section === 'settings' ? 'active' : ''}
+            onClick={() => setSection('settings')}
+          >
+            <span>⚙</span> Site settings
+          </button>
         </nav>
         <div className="sidebar-footer">
-          <div className="status-dot"><i /> API connected</div>
+          <div className="status-dot">
+            <i /> API connected
+          </div>
           <button onClick={() => supabase?.auth.signOut()}>Sign out ↗</button>
         </div>
       </aside>
 
       <main className="dashboard">
         <header className="topbar">
-          <div><p className="eyebrow">PORTFOLIO CMS / {section.toUpperCase()}</p><h1>{section === 'overview' ? 'Good to see you.' : section[0].toUpperCase() + section.slice(1)}</h1></div>
-          {(section === 'overview' || section === 'projects') && <button className="primary-button compact" onClick={() => setSelected(null)}>+ New project</button>}
+          <div>
+            <p className="eyebrow">PORTFOLIO CMS / {section.toUpperCase()}</p>
+            <h1>
+              {section === 'overview'
+                ? 'Good to see you.'
+                : section[0].toUpperCase() + section.slice(1)}
+            </h1>
+          </div>
+          {(section === 'overview' || section === 'projects') && (
+            <button className="primary-button compact" onClick={() => setSelected(null)}>
+              + New project
+            </button>
+          )}
         </header>
 
         {error && <div className="error">{error}</div>}
-        {section === 'overview' && <section className="stats-grid">
-          <article><span>ALL PROJECTS</span><strong>{projects.length.toString().padStart(2, '0')}</strong><small>Portfolio entries</small></article>
-          <article><span>PUBLISHED</span><strong className="green">{published.toString().padStart(2, '0')}</strong><small>Visible to everyone</small></article>
-          <article><span>FEATURED</span><strong className="cyan">{featured.toString().padStart(2, '0')}</strong><small>Homepage highlights</small></article>
-          <article><span>SYSTEM</span><strong className="system-ok">ONLINE</strong><small>All services operational</small></article>
-        </section>}
+        {section === 'overview' && (
+          <section className="stats-grid">
+            <article>
+              <span>ALL PROJECTS</span>
+              <strong>{projects.length.toString().padStart(2, '0')}</strong>
+              <small>Portfolio entries</small>
+            </article>
+            <article>
+              <span>PUBLISHED</span>
+              <strong className="green">{published.toString().padStart(2, '0')}</strong>
+              <small>Visible to everyone</small>
+            </article>
+            <article>
+              <span>FEATURED</span>
+              <strong className="cyan">{featured.toString().padStart(2, '0')}</strong>
+              <small>Homepage highlights</small>
+            </article>
+            <article>
+              <span>SYSTEM</span>
+              <strong className="system-ok">ONLINE</strong>
+              <small>All services operational</small>
+            </article>
+          </section>
+        )}
 
-        {(section === 'overview' || section === 'projects') && <section className="content-card">
-          <div className="section-heading"><div><p className="eyebrow">CONTENT</p><h2>Projects</h2></div><button className="secondary-button" onClick={loadProjects}>↻ Refresh</button></div>
-          {loading ? <div className="table-state"><div className="loader" /> Loading content…</div> :
-            projects.length === 0 ? <div className="table-state">No projects yet.</div> : (
+        {(section === 'overview' || section === 'projects') && (
+          <section className="content-card">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">CONTENT</p>
+                <h2>Projects</h2>
+              </div>
+              <button className="secondary-button" onClick={loadProjects}>
+                ↻ Refresh
+              </button>
+            </div>
+            {loading ? (
+              <div className="table-state">
+                <div className="loader" /> Loading content…
+              </div>
+            ) : projects.length === 0 ? (
+              <div className="table-state">No projects yet.</div>
+            ) : (
               <div className="project-table">
-                <div className="table-row table-head"><span>Project</span><span>Category</span><span>Year</span><span>Status</span><span /></div>
+                <div className="table-row table-head">
+                  <span>Project</span>
+                  <span>Category</span>
+                  <span>Year</span>
+                  <span>Status</span>
+                  <span />
+                </div>
                 {projects.map((project) => (
                   <div className="table-row" key={project.id}>
-                    <span className="project-cell"><i style={{ background: project.color }} /><span><strong>{project.title}</strong><small>/{project.slug}</small></span></span>
-                    <span>{project.category || '—'}</span><span>{project.year || '—'}</span>
-                    <span><b className={`badge ${project.status}`}>{project.status}</b></span>
-                    <span className="row-actions"><button onClick={() => setSelected(project)}>Edit</button><button className="danger-button" onClick={() => removeProject(project)}>Delete</button></span>
+                    <span className="project-cell">
+                      <i style={{ background: project.color }} />
+                      <span>
+                        <strong>{project.title}</strong>
+                        <small>/{project.slug}</small>
+                      </span>
+                    </span>
+                    <span>{project.category || '—'}</span>
+                    <span>{project.year || '—'}</span>
+                    <span>
+                      <b className={`badge ${project.status}`}>{project.status}</b>
+                    </span>
+                    <span className="row-actions">
+                      <button onClick={() => setSelected(project)}>Edit</button>
+                      <button className="danger-button" onClick={() => removeProject(project)}>
+                        Delete
+                      </button>
+                    </span>
                   </div>
                 ))}
               </div>
             )}
-        </section>}
+          </section>
+        )}
         {section === 'experiences' && <CollectionManager name="experiences" />}
         {section === 'skills' && <CollectionManager name="skills" />}
         {section === 'socials' && <CollectionManager name="socials" />}
         {section === 'messages' && <MessagesManager />}
+        {section === 'resumes' && <ResumesManager />}
         {section === 'settings' && <SettingsManager />}
       </main>
-      {selected !== undefined && <ProjectEditor project={selected} onClose={() => setSelected(undefined)} onSave={saveProject} />}
+      {selected !== undefined && (
+        <ProjectEditor
+          project={selected}
+          onClose={() => setSelected(undefined)}
+          onSave={saveProject}
+        />
+      )}
     </div>
   );
 }

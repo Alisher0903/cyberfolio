@@ -1,7 +1,7 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { createServiceSupabaseClient } from './database.js';
 import { getEnv } from './env.js';
 import { requireAdmin } from './auth.js';
@@ -15,6 +15,8 @@ import {
   skillCategorySchema,
   socialLinkSchema,
   siteSettingSchema,
+  cloudResumeSchema,
+  resumeKeySchema,
 } from './schemas.js';
 import { sendTelegramContactNotification } from './telegram.js';
 
@@ -44,6 +46,29 @@ const db = () => {
   const env = getEnv();
   return createServiceSupabaseClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 };
+
+const resumeKeyHash = (key: string) =>
+  createHmac('sha256', getEnv().SUPABASE_SERVICE_ROLE_KEY)
+    .update(key.normalize('NFKC'))
+    .digest('hex');
+
+async function checkResumeRateLimit(context: Context<{ Variables: Variables }>) {
+  const forwardedFor = context.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  const ipHash = createHash('sha256').update(`resume:${forwardedFor}`).digest('hex');
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const client = db();
+  const { count, error } = await client
+    .from('resume_access_attempts')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip_hash', ipHash)
+    .gte('created_at', oneHourAgo);
+  if (error) return { allowed: false, status: 500 as const };
+  if ((count ?? 0) >= 30) return { allowed: false, status: 429 as const };
+  const { error: writeError } = await client
+    .from('resume_access_attempts')
+    .insert({ ip_hash: ipHash });
+  return { allowed: !writeError, status: writeError ? (500 as const) : (200 as const) };
+}
 
 app.get('/health', (context) =>
   context.json({ status: 'ok', service: 'alisherdev-api', timestamp: new Date().toISOString() }),
@@ -88,7 +113,8 @@ app.get('/projects/:slug', async (context) => {
 
 app.post('/contact', async (context) => {
   const body = contactMessageSchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid message', issues: body.error.issues }, 400);
+  if (!body.success)
+    return context.json({ error: 'Invalid message', issues: body.error.issues }, 400);
   if (body.data.website) return context.json({ accepted: true }, 202);
 
   const forwardedFor = context.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
@@ -105,7 +131,9 @@ app.post('/contact', async (context) => {
   const { website: _honeypot, ...message } = body.data;
   const client = db();
   const [{ error }, { error: rateWriteError }] = await Promise.all([
-    client.from('contact_messages').insert({ ...message, user_agent: context.req.header('User-Agent') ?? null }),
+    client
+      .from('contact_messages')
+      .insert({ ...message, user_agent: context.req.header('User-Agent') ?? null }),
     client.from('contact_rate_limits').insert({ ip_hash: ipHash }),
   ]);
 
@@ -113,6 +141,85 @@ app.post('/contact', async (context) => {
 
   const telegramSent = await sendTelegramContactNotification(message);
   return context.json({ accepted: true, telegramSent }, 201);
+});
+
+app.post('/resumes/save', async (context) => {
+  const limit = await checkResumeRateLimit(context);
+  if (!limit.allowed)
+    return context.json(
+      {
+        error:
+          limit.status === 429
+            ? 'Too many requests. Try again later.'
+            : 'Could not verify request limit',
+      },
+      limit.status,
+    );
+  const body = cloudResumeSchema.safeParse(await context.req.json().catch(() => null));
+  if (!body.success)
+    return context.json({ error: 'Invalid resume', issues: body.error.issues }, 400);
+  const { data, error } = await db()
+    .from('cloud_resumes')
+    .upsert(
+      {
+        key_hash: resumeKeyHash(body.data.key),
+        name: body.data.data.name,
+        title: body.data.data.title,
+        data: body.data.data,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'key_hash' },
+    )
+    .select('id,name,title,created_at,updated_at')
+    .single();
+  if (error) return context.json({ error: 'Could not save resume' }, 500);
+  return context.json(data, 201);
+});
+
+app.post('/resumes/load', async (context) => {
+  const limit = await checkResumeRateLimit(context);
+  if (!limit.allowed)
+    return context.json(
+      {
+        error:
+          limit.status === 429
+            ? 'Too many requests. Try again later.'
+            : 'Could not verify request limit',
+      },
+      limit.status,
+    );
+  const body = resumeKeySchema.safeParse(await context.req.json().catch(() => null));
+  if (!body.success) return context.json({ error: 'Invalid recovery key' }, 400);
+  const { data, error } = await db()
+    .from('cloud_resumes')
+    .select('data,updated_at')
+    .eq('key_hash', resumeKeyHash(body.data.key))
+    .maybeSingle();
+  if (error) return context.json({ error: 'Could not load resume' }, 500);
+  if (!data) return context.json({ error: 'Resume not found' }, 404);
+  return context.json(data);
+});
+
+app.delete('/resumes', async (context) => {
+  const limit = await checkResumeRateLimit(context);
+  if (!limit.allowed)
+    return context.json(
+      {
+        error:
+          limit.status === 429
+            ? 'Too many requests. Try again later.'
+            : 'Could not verify request limit',
+      },
+      limit.status,
+    );
+  const body = resumeKeySchema.safeParse(await context.req.json().catch(() => null));
+  if (!body.success) return context.json({ error: 'Invalid recovery key' }, 400);
+  const { error } = await db()
+    .from('cloud_resumes')
+    .delete()
+    .eq('key_hash', resumeKeyHash(body.data.key));
+  if (error) return context.json({ error: 'Could not delete resume' }, 500);
+  return context.body(null, 204);
 });
 
 app.use('/admin/*', requireAdmin);
@@ -125,7 +232,8 @@ app.get('/admin/projects', async (context) => {
 
 app.post('/admin/projects', async (context) => {
   const body = projectSchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid project', issues: body.error.issues }, 400);
+  if (!body.success)
+    return context.json({ error: 'Invalid project', issues: body.error.issues }, 400);
   const { data, error } = await db().from('projects').insert(body.data).select().single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data, 201);
@@ -133,7 +241,8 @@ app.post('/admin/projects', async (context) => {
 
 app.patch('/admin/projects/:id', async (context) => {
   const body = projectPatchSchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid project', issues: body.error.issues }, 400);
+  if (!body.success)
+    return context.json({ error: 'Invalid project', issues: body.error.issues }, 400);
   const { data, error } = await db()
     .from('projects')
     .update({ ...body.data, updated_at: new Date().toISOString() })
@@ -151,19 +260,28 @@ app.delete('/admin/projects/:id', async (context) => {
 });
 
 app.get('/admin/projects/:id/detail', async (context) => {
-  const { data, error } = await db().from('project_details').select('*').eq('project_id', context.req.param('id')).maybeSingle();
+  const { data, error } = await db()
+    .from('project_details')
+    .select('*')
+    .eq('project_id', context.req.param('id'))
+    .maybeSingle();
   if (error) return context.json({ error: error.message }, 500);
   return context.json(data);
 });
 
 app.put('/admin/projects/:id/detail', async (context) => {
   const body = projectDetailSchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid project detail', issues: body.error.issues }, 400);
-  const { data, error } = await db().from('project_details').upsert({
-    project_id: context.req.param('id'),
-    ...body.data,
-    updated_at: new Date().toISOString(),
-  }).select().single();
+  if (!body.success)
+    return context.json({ error: 'Invalid project detail', issues: body.error.issues }, 400);
+  const { data, error } = await db()
+    .from('project_details')
+    .upsert({
+      project_id: context.req.param('id'),
+      ...body.data,
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data);
 });
@@ -176,7 +294,8 @@ app.get('/admin/experiences', async (context) => {
 
 app.post('/admin/experiences', async (context) => {
   const body = experienceSchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid experience', issues: body.error.issues }, 400);
+  if (!body.success)
+    return context.json({ error: 'Invalid experience', issues: body.error.issues }, 400);
   const { data, error } = await db().from('experiences').insert(body.data).select().single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data, 201);
@@ -184,8 +303,14 @@ app.post('/admin/experiences', async (context) => {
 
 app.patch('/admin/experiences/:id', async (context) => {
   const body = experienceSchema.partial().safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid experience', issues: body.error.issues }, 400);
-  const { data, error } = await db().from('experiences').update({ ...body.data, updated_at: new Date().toISOString() }).eq('id', context.req.param('id')).select().single();
+  if (!body.success)
+    return context.json({ error: 'Invalid experience', issues: body.error.issues }, 400);
+  const { data, error } = await db()
+    .from('experiences')
+    .update({ ...body.data, updated_at: new Date().toISOString() })
+    .eq('id', context.req.param('id'))
+    .select()
+    .single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data);
 });
@@ -204,7 +329,8 @@ app.get('/admin/skills', async (context) => {
 
 app.post('/admin/skills', async (context) => {
   const body = skillCategorySchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid skill category', issues: body.error.issues }, 400);
+  if (!body.success)
+    return context.json({ error: 'Invalid skill category', issues: body.error.issues }, 400);
   const { data, error } = await db().from('skill_categories').insert(body.data).select().single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data, 201);
@@ -212,8 +338,14 @@ app.post('/admin/skills', async (context) => {
 
 app.patch('/admin/skills/:id', async (context) => {
   const body = skillCategorySchema.partial().safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid skill category', issues: body.error.issues }, 400);
-  const { data, error } = await db().from('skill_categories').update({ ...body.data, updated_at: new Date().toISOString() }).eq('id', context.req.param('id')).select().single();
+  if (!body.success)
+    return context.json({ error: 'Invalid skill category', issues: body.error.issues }, 400);
+  const { data, error } = await db()
+    .from('skill_categories')
+    .update({ ...body.data, updated_at: new Date().toISOString() })
+    .eq('id', context.req.param('id'))
+    .select()
+    .single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data);
 });
@@ -232,7 +364,8 @@ app.get('/admin/socials', async (context) => {
 
 app.post('/admin/socials', async (context) => {
   const body = socialLinkSchema.safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid social link', issues: body.error.issues }, 400);
+  if (!body.success)
+    return context.json({ error: 'Invalid social link', issues: body.error.issues }, 400);
   const { data, error } = await db().from('social_links').insert(body.data).select().single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data, 201);
@@ -240,8 +373,14 @@ app.post('/admin/socials', async (context) => {
 
 app.patch('/admin/socials/:id', async (context) => {
   const body = socialLinkSchema.partial().safeParse(await context.req.json().catch(() => null));
-  if (!body.success) return context.json({ error: 'Invalid social link', issues: body.error.issues }, 400);
-  const { data, error } = await db().from('social_links').update({ ...body.data, updated_at: new Date().toISOString() }).eq('id', context.req.param('id')).select().single();
+  if (!body.success)
+    return context.json({ error: 'Invalid social link', issues: body.error.issues }, 400);
+  const { data, error } = await db()
+    .from('social_links')
+    .update({ ...body.data, updated_at: new Date().toISOString() })
+    .eq('id', context.req.param('id'))
+    .select()
+    .single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data);
 });
@@ -264,7 +403,12 @@ app.get('/admin/messages', async (context) => {
 app.patch('/admin/messages/:id', async (context) => {
   const body = messageStatusSchema.safeParse(await context.req.json().catch(() => null));
   if (!body.success) return context.json({ error: 'Invalid message status' }, 400);
-  const { data, error } = await db().from('contact_messages').update(body.data).eq('id', context.req.param('id')).select().single();
+  const { data, error } = await db()
+    .from('contact_messages')
+    .update(body.data)
+    .eq('id', context.req.param('id'))
+    .select()
+    .single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data);
 });
@@ -281,14 +425,33 @@ app.get('/admin/settings', async (context) => {
   return context.json(data);
 });
 
+app.get('/admin/resumes', async (context) => {
+  const { data, error } = await db()
+    .from('cloud_resumes')
+    .select('id,name,title,data,created_at,updated_at')
+    .order('updated_at', { ascending: false });
+  if (error) return context.json({ error: error.message }, 500);
+  return context.json(data);
+});
+
+app.delete('/admin/resumes/:id', async (context) => {
+  const { error } = await db().from('cloud_resumes').delete().eq('id', context.req.param('id'));
+  if (error) return context.json({ error: error.message }, 400);
+  return context.body(null, 204);
+});
+
 app.put('/admin/settings/:key', async (context) => {
   const body = siteSettingSchema.safeParse(await context.req.json().catch(() => null));
   if (!body.success) return context.json({ error: 'Invalid setting value' }, 400);
-  const { data, error } = await db().from('site_settings').upsert({
-    key: context.req.param('key'),
-    value: body.data.value,
-    updated_at: new Date().toISOString(),
-  }).select().single();
+  const { data, error } = await db()
+    .from('site_settings')
+    .upsert({
+      key: context.req.param('key'),
+      value: body.data.value,
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
   if (error) return context.json({ error: error.message }, 400);
   return context.json(data);
 });

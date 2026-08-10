@@ -6,13 +6,22 @@ export const metricSchema = z.object({
 });
 
 export const projectSchema = z.object({
-  slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   title: z.string().trim().min(1).max(160),
   subtitle: z.string().trim().max(240).default(''),
   description: z.string().trim().max(5000).default(''),
   tech: z.array(z.string().trim().min(1).max(80)).max(40).default([]),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i).default('#00FF87'),
-  accent_color: z.string().regex(/^#[0-9a-f]{6}$/i).default('#00CC6A'),
+  color: z
+    .string()
+    .regex(/^#[0-9a-f]{6}$/i)
+    .default('#00FF87'),
+  accent_color: z
+    .string()
+    .regex(/^#[0-9a-f]{6}$/i)
+    .default('#00CC6A'),
   category: z.string().trim().max(120).default(''),
   year: z.string().trim().max(20).default(''),
   live_url: z.string().trim().max(500).default(''),
@@ -45,7 +54,10 @@ export const experienceSchema = z.object({
 
 export const skillCategorySchema = z.object({
   name: z.string().trim().min(1).max(120),
-  slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   skills: z.array(z.string().trim().min(1).max(120)).max(100).default([]),
   status: z.enum(['draft', 'published']).default('draft'),
   sort_order: z.number().int().min(0).default(0),
@@ -55,7 +67,10 @@ export const socialLinkSchema = z.object({
   label: z.string().trim().min(1).max(80),
   handle: z.string().trim().max(160).default(''),
   href: z.string().trim().min(1).max(500),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i).default('#00FF87'),
+  color: z
+    .string()
+    .regex(/^#[0-9a-f]{6}$/i)
+    .default('#00FF87'),
   status: z.enum(['draft', 'published']).default('draft'),
   sort_order: z.number().int().min(0).default(0),
 });
@@ -78,3 +93,79 @@ export const projectDetailSchema = z.object({
 export const siteSettingSchema = z.object({
   value: z.record(z.string(), z.unknown()),
 });
+
+const resumeItemId = z.string().trim().min(1).max(80);
+const shortText = z.string().max(500);
+
+export const resumeDataSchema = z.object({
+  name: shortText,
+  title: shortText,
+  email: shortText,
+  phone: shortText,
+  location: shortText,
+  website: shortText,
+  github: shortText,
+  linkedin: shortText,
+  summary: z.string().max(5000),
+  work: z
+    .array(
+      z.object({
+        id: resumeItemId,
+        company: shortText,
+        role: shortText,
+        period: shortText,
+        description: z.string().max(5000),
+        highlights: z.string().max(5000),
+      }),
+    )
+    .max(30),
+  education: z
+    .array(
+      z.object({
+        id: resumeItemId,
+        school: shortText,
+        degree: shortText,
+        year: shortText,
+        gpa: shortText.optional(),
+      }),
+    )
+    .max(30),
+  projects: z
+    .array(
+      z.object({
+        id: resumeItemId,
+        name: shortText,
+        tech: z.string().max(2000),
+        description: z.string().max(5000),
+        link: shortText.optional(),
+      }),
+    )
+    .max(30),
+  skillGroups: z
+    .array(z.object({ id: resumeItemId, category: shortText, skills: z.string().max(5000) }))
+    .max(30),
+  trainings: z
+    .array(
+      z.object({
+        id: resumeItemId,
+        course: shortText,
+        provider: shortText,
+        period: shortText,
+        credential: shortText.optional(),
+      }),
+    )
+    .max(30),
+  languages: z
+    .array(z.object({ id: resumeItemId, language: shortText, proficiency: shortText }))
+    .max(30),
+  colorTheme: z.enum(['green', 'cyan', 'red', 'amber', 'violet']),
+  layoutStyle: z.enum(['modern', 'minimal', 'terminal']),
+  showPhoto: z.boolean(),
+});
+
+export const cloudResumeSchema = z.object({
+  key: z.string().min(8).max(128),
+  data: resumeDataSchema,
+});
+
+export const resumeKeySchema = z.object({ key: z.string().min(8).max(128) });

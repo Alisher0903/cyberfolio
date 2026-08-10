@@ -60,6 +60,8 @@ export const adminApi = {
       method: 'PUT',
       body: JSON.stringify({ value }),
     }),
+  resumes: () => request<CloudResume[]>('/admin/resumes'),
+  deleteResume: (id: string) => request<void>(`/admin/resumes/${id}`, { method: 'DELETE' }),
 };
 
 export type CollectionName = 'experiences' | 'skills' | 'socials' | 'messages';
@@ -111,4 +113,13 @@ export interface ProjectDetailInput {
 
 export interface AdminProjectDetail extends ProjectDetailInput {
   project_id: string;
+}
+
+export interface CloudResume {
+  id: string;
+  name: string;
+  title: string;
+  data: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
