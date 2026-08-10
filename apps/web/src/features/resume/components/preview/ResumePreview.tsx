@@ -471,11 +471,12 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                 <div
                   key={item.id}
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.5rem',
-                    marginBottom: '0.4rem',
+                    flexWrap: 'wrap',
+                    gap: '0.35rem',
+                    marginRight: '0.7rem',
+                    marginBottom: '0.35rem',
                   }}
                 >
                   <strong
@@ -486,14 +487,15 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
                   >
                     {item.language || 'Language'}
                   </strong>
+                  <span style={{ fontSize: '0.58rem', color: isTerm ? '#3A5568' : '#999' }}>—</span>
                   <span
                     style={{
                       fontSize: '0.56rem',
-                      color: theme.primary,
-                      border: `1px solid ${theme.primary}35`,
-                      background: theme.bg,
-                      borderRadius: '999px',
-                      padding: '1px 6px',
+                      color: isMin ? '#555' : theme.primary,
+                      border: isMin ? 'none' : `1px solid ${theme.primary}35`,
+                      background: isMin ? 'transparent' : theme.bg,
+                      borderRadius: isMin ? '0' : '999px',
+                      padding: isMin ? '0' : '1px 6px',
                       whiteSpace: 'nowrap',
                     }}
                   >
