@@ -17,7 +17,7 @@ export const skillCategoryMeta: Record<SkillCategory, SkillCategoryMeta> = {
     code: '</>',
     eyebrow: 'Product engineering',
     description:
-      'Modern web and mobile interfaces, state management, integrations and delivery workflows.',
+      'Building modern, responsive, and high-performance web applications with a focus on clean architecture and user experience.',
     activeClass: 'border-accent/35 bg-accent/[0.05] text-accent shadow-[inset_0_-2px_0_#00FF87]',
     textClass: 'text-accent',
     dotClass: 'bg-accent',
@@ -27,7 +27,7 @@ export const skillCategoryMeta: Record<SkillCategory, SkillCategoryMeta> = {
     color: '#FF3B6B',
     code: '[::]',
     eyebrow: 'Systems & security',
-    description: 'Operating systems, networking and scripting foundations for secure development.',
+    description: 'Web application security, penetration testing, networking, operating systems, and security automation fundamentals.',
     activeClass: 'border-danger/35 bg-danger/[0.05] text-danger shadow-[inset_0_-2px_0_#FF3B6B]',
     textClass: 'text-danger',
     dotClass: 'bg-danger',
@@ -37,8 +37,7 @@ export const skillCategoryMeta: Record<SkillCategory, SkillCategoryMeta> = {
     color: '#00D4FF',
     code: '+++',
     eyebrow: 'Supporting toolkit',
-    description:
-      'Productivity, design and AI-assisted tools used throughout the development process.',
+    description: 'Development, collaboration, documentation, design, and AI-assisted productivity tools.',
     activeClass: 'border-cyan/35 bg-cyan/[0.05] text-cyan shadow-[inset_0_-2px_0_#00D4FF]',
     textClass: 'text-cyan',
     dotClass: 'bg-cyan',
