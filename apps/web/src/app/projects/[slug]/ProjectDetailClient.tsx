@@ -25,7 +25,7 @@ export default function ProjectDetailClient({
   const { heroRef, contentRef } = useProjectDetailAnimations(project.slug);
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary">
+    <div className="min-h-screen bg-bg text-text-primary [overflow-wrap:anywhere]">
       <nav
         className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-border bg-bg/90 px-4 py-4 backdrop-blur-xl md:px-8"
         aria-label="Project navigation"
@@ -54,7 +54,7 @@ export default function ProjectDetailClient({
             background: `radial-gradient(circle,${project.color}08 0%,transparent 65%)`,
           }}
         />
-        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-24 md:px-16 lg:grid-cols-2">
+        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-24 md:px-16 lg:grid-cols-2 [&>*]:min-w-0">
           <div>
             <p
               className="detail-tag mb-6 inline-flex rounded-full border px-3 py-1.5 font-mono text-xs"
@@ -121,11 +121,11 @@ export default function ProjectDetailClient({
                 <span className="h-2.5 w-2.5 rounded-full bg-accent" />
                 <span className="ml-3 font-mono text-xs text-text-dim">Project overview</span>
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
                 {project.metrics.map((metric) => (
                   <div key={metric.label} className="rounded-xl border border-border bg-bg p-4">
                     <strong
-                      className="block font-display text-2xl"
+                      className="block font-display text-xl leading-snug"
                       style={{ color: project.color }}
                     >
                       {metric.value}

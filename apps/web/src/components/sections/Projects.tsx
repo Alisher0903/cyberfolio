@@ -26,11 +26,33 @@ export default function Projects() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
+  useEffect(() => {
+    const panel = containerRef.current;
+    if (!panel) return;
+    const measure = () => {
+      const fits =
+        window.innerWidth >= 1280 &&
+        window.innerHeight >= 850 &&
+        panel.scrollHeight <= window.innerHeight + 1;
+      setPinned(fits);
+    };
+    const observer = new window.ResizeObserver(measure);
+    observer.observe(panel);
+    Array.from(panel.children).forEach((child) => observer.observe(child));
+    window.addEventListener('resize', measure);
+    measure();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [projects.length, activeIndex]);
 
   useEffect(() => {
     const section = sectionRef.current;
     const container = containerRef.current;
-    if (!section || !container || projects.length === 0) return;
+    if (!section || !container || projects.length === 0 || !pinned) return;
 
     const ctx = gsap.context(() => {
       const total = projects.length;
@@ -56,19 +78,23 @@ export default function Projects() {
     }, section);
 
     return () => ctx.revert();
-  }, [projects.length]);
+  }, [projects.length, pinned]);
 
-  const project = projects[activeIndex];
+  const project = projects[Math.min(activeIndex, projects.length - 1)];
 
   if (!project) {
     return null;
   }
 
   return (
-    <div ref={sectionRef} id="projects" style={{ height: `${(projects.length + 1) * 100}vh` }}>
+    <div
+      ref={sectionRef}
+      id="projects"
+      style={{ height: pinned ? `${(projects.length + 1) * 100}vh` : 'auto' }}
+    >
       <div
         ref={containerRef}
-        className="h-screen flex flex-col overflow-hidden"
+        className={`flex flex-col ${pinned ? 'h-screen' : 'min-h-svh pb-24 md:pb-8'}`}
         style={{ backgroundColor: '#050A0E' }}
         role="region"
         aria-label="Projects showcase"
@@ -116,11 +142,11 @@ export default function Projects() {
         </div>
 
         {/* ── Content ──────────────────────────────── */}
-        <div className="flex-1 px-4 md:px-16 grid md:grid-cols-2 gap-6 items-center min-h-0 overflow-hidden">
+        <div className="flex-1 px-4 md:px-16 grid xl:grid-cols-2 gap-8 items-center min-w-0 py-6">
           {/* Left: text */}
           <div
             key={`left-${activeIndex}`}
-            className="flex flex-col justify-center"
+            className="flex min-w-0 flex-col justify-center [overflow-wrap:anywhere]"
             style={{ animation: 'fadeInLeft 0.45s ease forwards' }}
           >
             <style>{`@keyframes fadeInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}`}</style>
@@ -143,7 +169,7 @@ export default function Projects() {
 
             <h3
               className="font-display font-bold mb-2"
-              style={{ color: '#E8F4FD', fontSize: 'clamp(2rem,5vw,4rem)', lineHeight: 1.05 }}
+              style={{ color: '#E8F4FD', fontSize: 'clamp(2rem,3.5vw,3.5rem)', lineHeight: 1.12 }}
             >
               {project?.title}
             </h3>
@@ -151,7 +177,7 @@ export default function Projects() {
               {project?.subtitle}
             </p>
             <p
-              className="leading-relaxed mb-5 text-sm md:text-base max-w-lg line-clamp-3 md:line-clamp-none"
+              className="leading-relaxed mb-5 text-sm md:text-base max-w-prose"
               style={{ color: '#7FA8C4' }}
             >
               {project?.description}
@@ -179,11 +205,11 @@ export default function Projects() {
             </div>
 
             {/* Metrics */}
-            <div className="flex gap-6 mb-6">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
               {project?.metrics.map((m) => (
-                <div key={m.label}>
+                <div key={m.label} className="min-w-0 [overflow-wrap:anywhere]">
                   <div
-                    className="font-display text-xl md:text-2xl font-bold"
+                    className="font-display text-lg md:text-xl font-bold leading-snug"
                     style={{ color: project?.color }}
                   >
                     {m.value}
@@ -255,7 +281,7 @@ export default function Projects() {
           {/* Right: visual card (hidden on small mobile) */}
           <div
             key={`right-${activeIndex}`}
-            className="hidden md:block"
+            className="min-w-0"
             style={{ animation: 'fadeInRight 0.45s ease forwards' }}
           >
             <style>{`@keyframes fadeInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}`}</style>
@@ -273,7 +299,7 @@ export default function Projects() {
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FFB800' }} />
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00FF87' }} />
                 <div
-                  className="ml-2 flex-1 h-6 rounded font-mono text-xs flex items-center px-3"
+                  className="ml-2 min-w-0 flex-1 truncate h-6 rounded font-mono text-xs px-3 leading-6"
                   style={{ backgroundColor: '#050A0E', color: '#3A5568' }}
                 >
                   {displayUrl(project.link)}
@@ -285,7 +311,7 @@ export default function Projects() {
                     src={project.coverImage}
                     alt={`${project.title} project cover`}
                     fill
-                    sizes="50vw"
+                    sizes="(min-width: 1280px) 50vw, 100vw"
                     className="object-cover"
                   />
                 </div>
@@ -301,18 +327,20 @@ export default function Projects() {
                         style={{ backgroundColor: project?.color + '30' }}
                       />
                     </div>
-                    <div
-                      className="h-8 w-20 rounded flex items-center justify-center font-mono text-xs"
-                      style={{ backgroundColor: project?.color, color: '#050A0E' }}
-                    >
-                      LIVE
-                    </div>
+                    {isExternalUrl(project.link) && (
+                      <div
+                        className="h-8 w-20 rounded flex items-center justify-center font-mono text-xs"
+                        style={{ backgroundColor: project?.color, color: '#050A0E' }}
+                      >
+                        LIVE
+                      </div>
+                    )}
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {project?.metrics.map((m, i) => (
                       <div
                         key={i}
-                        className="rounded-lg p-3"
+                        className="min-w-0 rounded-lg p-3 [overflow-wrap:anywhere]"
                         style={{ backgroundColor: '#050A0E' }}
                       >
                         <div
@@ -327,7 +355,10 @@ export default function Projects() {
                         <div className="mt-2 h-1 rounded" style={{ backgroundColor: '#0E2030' }}>
                           <div
                             className="h-full rounded"
-                            style={{ backgroundColor: project?.color, width: `${55 + i * 15}%` }}
+                            style={{
+                              backgroundColor: project?.color,
+                              width: `${Math.min(100, 55 + i * 15)}%`,
+                            }}
                           />
                         </div>
                       </div>
@@ -358,7 +389,7 @@ export default function Projects() {
 
         {/* Dot nav */}
         <div
-          className="flex items-center justify-center gap-3 pb-4 flex-shrink-0"
+          className="flex flex-wrap items-center justify-center gap-2 px-4 pb-4 flex-shrink-0"
           role="tablist"
           aria-label="Project navigation"
         >
@@ -369,6 +400,16 @@ export default function Projects() {
               aria-selected={i === activeIndex}
               aria-label={`Go to project ${i + 1}: ${p.title}`}
               onClick={() => {
+                if (!pinned) {
+                  setActiveIndex(i);
+                  const section = sectionRef.current;
+                  if (section)
+                    window.scrollTo({
+                      top: section.getBoundingClientRect().top + window.scrollY - 64,
+                      behavior: 'smooth',
+                    });
+                  return;
+                }
                 const el = document.getElementById('projects');
                 if (!el) return;
                 const top =
@@ -376,8 +417,10 @@ export default function Projects() {
                 window.scrollTo({ top, behavior: 'smooth' });
               }}
               style={{
-                width: i === activeIndex ? '2rem' : '0.5rem',
-                height: '0.25rem',
+                width: i === activeIndex ? '2.5rem' : '1.75rem',
+                height: '1.75rem',
+                paddingBlock: '10px',
+                backgroundClip: 'content-box',
                 borderRadius: '9999px',
                 backgroundColor: i === activeIndex ? p.color : '#0E2030',
                 transition: 'all 0.3s ease',
@@ -389,7 +432,7 @@ export default function Projects() {
           className="text-center font-mono text-xs pb-3 flex-shrink-0"
           style={{ color: '#3A5568' }}
         >
-          scroll ↓ to navigate
+          {pinned ? 'scroll ↓ to navigate' : 'Select a project above'}
         </p>
       </div>
     </div>

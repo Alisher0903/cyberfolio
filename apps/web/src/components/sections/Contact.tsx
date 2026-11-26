@@ -70,7 +70,7 @@ export default function Contact() {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="flex items-center justify-between p-4 rounded-xl border group transition-all duration-300"
+                  className="flex min-w-0 items-center justify-between p-4 rounded-xl border group transition-all duration-300 [overflow-wrap:anywhere]"
                   style={{ backgroundColor: '#0A1219', borderColor: '#0E2030' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = link.color + '40';
