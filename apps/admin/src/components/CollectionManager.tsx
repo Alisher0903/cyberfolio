@@ -1,11 +1,7 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
-import {
-  adminApi,
-  type CollectionItem,
-  type CollectionName,
-} from '@/lib/api';
+import { adminApi, type CollectionItem, type CollectionName } from '@/lib/api';
 
 interface Field {
   key: string;
@@ -14,14 +10,17 @@ interface Field {
   required?: boolean;
 }
 
-const configs: Record<Exclude<CollectionName, 'messages'>, {
-  title: string;
-  subtitle: string;
-  primary: string;
-  secondary: string;
-  fields: Field[];
-  defaults: Record<string, unknown>;
-}> = {
+const configs: Record<
+  Exclude<CollectionName, 'messages'>,
+  {
+    title: string;
+    subtitle: string;
+    primary: string;
+    secondary: string;
+    fields: Field[];
+    defaults: Record<string, unknown>;
+  }
+> = {
   experiences: {
     title: 'Experience',
     subtitle: 'Career timeline shown in the About section.',
@@ -36,7 +35,15 @@ const configs: Record<Exclude<CollectionName, 'messages'>, {
       { key: 'status', label: 'Status', kind: 'status' },
       { key: 'sort_order', label: 'Sort order', kind: 'number' },
     ],
-    defaults: { role: '', company: '', period: '', description: '', tags: [], status: 'draft', sort_order: 0 },
+    defaults: {
+      role: '',
+      company: '',
+      period: '',
+      description: '',
+      tags: [],
+      status: 'draft',
+      sort_order: 0,
+    },
   },
   skills: {
     title: 'Skill categories',
@@ -89,7 +96,9 @@ export default function CollectionManager({ name }: { name: Exclude<CollectionNa
     }
   }, [name]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   function open(item: CollectionItem | null) {
     setEditing(item);
@@ -101,7 +110,10 @@ export default function CollectionManager({ name }: { name: Exclude<CollectionNa
     const normalized = { ...value };
     for (const field of config.fields) {
       if (field.kind === 'list' && typeof normalized[field.key] === 'string') {
-        normalized[field.key] = (normalized[field.key] as string).split(',').map((item) => item.trim()).filter(Boolean);
+        normalized[field.key] = (normalized[field.key] as string)
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean);
       }
       if (field.kind === 'number') normalized[field.key] = Number(normalized[field.key] ?? 0);
     }
@@ -124,17 +136,35 @@ export default function CollectionManager({ name }: { name: Exclude<CollectionNa
   return (
     <section className="content-card">
       <div className="section-heading">
-        <div><p className="eyebrow">CONTENT MODULE</p><h2>{config.title}</h2><p className="section-copy">{config.subtitle}</p></div>
-        <button className="primary-button compact" onClick={() => open(null)}>+ Add item</button>
+        <div>
+          <p className="eyebrow">CONTENT MODULE</p>
+          <h2>{config.title}</h2>
+          <p className="section-copy">{config.subtitle}</p>
+        </div>
+        <button className="primary-button compact" onClick={() => open(null)}>
+          + Add item
+        </button>
       </div>
       {error && <div className="error module-error">{error}</div>}
-      {loading ? <div className="table-state"><div className="loader" /> Loading…</div> : (
+      {loading ? (
+        <div className="table-state">
+          <div className="loader" /> Loading…
+        </div>
+      ) : (
         <div className="module-list">
           {items.map((item) => (
             <article className="module-row" key={item.id}>
-              <div><strong>{String(item[config.primary] ?? '')}</strong><small>{String(item[config.secondary] ?? '')}</small></div>
+              <div>
+                <strong>{String(item[config.primary] ?? '')}</strong>
+                <small>{String(item[config.secondary] ?? '')}</small>
+              </div>
               <b className={`badge ${item.status}`}>{item.status}</b>
-              <div className="row-actions"><button onClick={() => open(item)}>Edit</button><button className="danger-button" onClick={() => remove(item)}>Delete</button></div>
+              <div className="row-actions">
+                <button onClick={() => open(item)}>Edit</button>
+                <button className="danger-button" onClick={() => remove(item)}>
+                  Delete
+                </button>
+              </div>
             </article>
           ))}
           {!items.length && <div className="table-state">No content yet.</div>}
@@ -143,23 +173,75 @@ export default function CollectionManager({ name }: { name: Exclude<CollectionNa
       {editing !== undefined && (
         <div className="editor-backdrop" onMouseDown={() => setEditing(undefined)}>
           <aside className="editor-panel" onMouseDown={(event) => event.stopPropagation()}>
-            <header><div><p className="eyebrow">{editing ? 'EDIT ITEM' : 'NEW ITEM'}</p><h2>{config.title}</h2></div><button className="icon-button" onClick={() => setEditing(undefined)}>×</button></header>
+            <header>
+              <div>
+                <p className="eyebrow">{editing ? 'EDIT ITEM' : 'NEW ITEM'}</p>
+                <h2>{config.title}</h2>
+              </div>
+              <button className="icon-button" onClick={() => setEditing(undefined)}>
+                ×
+              </button>
+            </header>
             <form onSubmit={submit}>
               <div className="form-grid">
                 {config.fields.map((field) => (
-                  <label className={field.kind === 'textarea' || field.kind === 'list' ? 'wide' : ''} key={field.key}>
+                  <label
+                    className={field.kind === 'textarea' || field.kind === 'list' ? 'wide' : ''}
+                    key={field.key}
+                  >
                     <span>{field.label}</span>
                     {field.kind === 'textarea' ? (
-                      <textarea rows={5} required={field.required} value={String(value[field.key] ?? '')} onChange={(e) => setValue((current) => ({ ...current, [field.key]: e.target.value }))} />
+                      <textarea
+                        rows={5}
+                        required={field.required}
+                        value={String(value[field.key] ?? '')}
+                        onChange={(e) =>
+                          setValue((current) => ({ ...current, [field.key]: e.target.value }))
+                        }
+                      />
                     ) : field.kind === 'status' ? (
-                      <select value={String(value[field.key] ?? 'draft')} onChange={(e) => setValue((current) => ({ ...current, [field.key]: e.target.value }))}><option value="draft">Draft</option><option value="published">Published</option></select>
+                      <select
+                        value={String(value[field.key] ?? 'draft')}
+                        onChange={(e) =>
+                          setValue((current) => ({ ...current, [field.key]: e.target.value }))
+                        }
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                      </select>
                     ) : (
-                      <input type={field.kind === 'color' ? 'color' : field.kind === 'number' ? 'number' : 'text'} required={field.required} value={field.kind === 'list' && Array.isArray(value[field.key]) ? (value[field.key] as string[]).join(', ') : String(value[field.key] ?? '')} onChange={(e) => setValue((current) => ({ ...current, [field.key]: e.target.value }))} />
+                      <input
+                        type={
+                          field.kind === 'color'
+                            ? 'color'
+                            : field.kind === 'number'
+                              ? 'number'
+                              : 'text'
+                        }
+                        required={field.required}
+                        value={
+                          field.kind === 'list' && Array.isArray(value[field.key])
+                            ? (value[field.key] as string[]).join(', ')
+                            : String(value[field.key] ?? '')
+                        }
+                        onChange={(e) =>
+                          setValue((current) => ({ ...current, [field.key]: e.target.value }))
+                        }
+                      />
                     )}
                   </label>
                 ))}
               </div>
-              <footer><button type="button" className="secondary-button" onClick={() => setEditing(undefined)}>Cancel</button><button className="primary-button">Save changes</button></footer>
+              <footer>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setEditing(undefined)}
+                >
+                  Cancel
+                </button>
+                <button className="primary-button">Save changes</button>
+              </footer>
             </form>
           </aside>
         </div>

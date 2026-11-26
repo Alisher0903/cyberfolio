@@ -1,6 +1,7 @@
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
+import { bodyLimit } from 'hono/body-limit';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { createServiceSupabaseClient } from './database.js';
 import { getEnv } from './env.js';
@@ -25,6 +26,17 @@ type Variables = { adminUserId: string };
 export const app = new Hono<{ Variables: Variables }>().basePath('/api/v1');
 
 app.use('*', secureHeaders());
+app.use(
+  '*',
+  bodyLimit({
+    maxSize: 512 * 1024,
+    onError: (context) => context.json({ error: 'Request too large' }, 413),
+  }),
+);
+app.use('/resumes*', async (context, next) => {
+  context.header('Cache-Control', 'no-store');
+  await next();
+});
 app.use('/admin/*', async (context, next) => {
   context.header('Cache-Control', 'no-store');
   await next();
@@ -36,7 +48,7 @@ app.use(
       const env = getEnv();
       const clientOrigins = env.CLIENT_ORIGIN.split(',').map((value) => value.trim());
       const adminOrigins = env.ADMIN_ORIGIN.split(',').map((value) => value.trim());
-      return [...clientOrigins, ...adminOrigins].includes(origin) ? origin : clientOrigins[0];
+      return [...clientOrigins, ...adminOrigins].includes(origin) ? origin : undefined;
     },
     allowHeaders: ['Authorization', 'Content-Type'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -56,7 +56,10 @@ export async function getPortfolioProjects(): Promise<Project[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) return [];
   try {
-    const response = await fetch(`${apiUrl}/portfolio`, { next: { revalidate: 60 } });
+    const response = await fetch(`${apiUrl}/portfolio`, {
+      next: { revalidate: 60 },
+      signal: globalThis.AbortSignal.timeout(10000),
+    });
     if (!response.ok) return [];
     const body = (await response.json()) as { projects: ApiProject[] };
     return body.projects.map((project, index) => mapProject(project, index + 1));
@@ -71,6 +74,7 @@ export async function getPortfolioProject(slug: string) {
     try {
       const response = await fetch(`${apiUrl}/projects/${encodeURIComponent(slug)}`, {
         next: { revalidate: 60 },
+        signal: globalThis.AbortSignal.timeout(10000),
       });
       if (response.ok) {
         const remote = (await response.json()) as ApiProject;
@@ -92,7 +96,7 @@ export async function getPortfolioProject(slug: string) {
         return { project: mapProject(remote, 1), detail };
       }
     } catch {
-      // Fall through to the bundled content so the portfolio remains resilient.
+      // Do not substitute another project's content when the API is unavailable.
     }
   }
 

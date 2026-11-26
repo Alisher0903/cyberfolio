@@ -13,7 +13,8 @@ export function SkillTabs({ skills, active, onChange }: SkillTabsProps) {
     <div className="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Skill categories">
       {categories.map((category) => {
         const isActive = active === category;
-        const meta = skillCategoryMeta[category as keyof typeof skillCategoryMeta] ?? skillCategoryMeta.Other;
+        const meta =
+          skillCategoryMeta[category as keyof typeof skillCategoryMeta] ?? skillCategoryMeta.Other;
 
         return (
           <button

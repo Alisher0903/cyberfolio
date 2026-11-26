@@ -93,7 +93,17 @@ export function PortfolioDataProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     try {
       const cached = window.localStorage.getItem('portfolio:last-known-good');
-      if (cached) setData(JSON.parse(cached) as PortfolioData);
+      if (cached) {
+        const saved = JSON.parse(cached) as PortfolioData;
+        if (
+          Array.isArray(saved.projects) &&
+          Array.isArray(saved.experience) &&
+          Array.isArray(saved.socials) &&
+          saved.skills &&
+          saved.settings
+        )
+          setData(saved);
+      }
     } catch {
       // Ignore invalid or unavailable browser storage.
     }
@@ -104,7 +114,7 @@ export function PortfolioDataProvider({ children }: { children: React.ReactNode 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!apiUrl) return controller.abort();
 
-    fetch(`${apiUrl}/portfolio`, { signal: controller.signal, next: { revalidate: 60 } })
+    fetch(`${apiUrl}/portfolio`, { signal: controller.signal, cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error('Portfolio API unavailable');
         return response.json() as Promise<ApiPortfolio>;
@@ -138,8 +148,13 @@ export function PortfolioDataProvider({ children }: { children: React.ReactNode 
           settings: remote.settings ?? {},
           isRemote: true,
         };
+        if (controller.signal.aborted) return;
         setData(nextData);
-        window.localStorage.setItem('portfolio:last-known-good', JSON.stringify(nextData));
+        try {
+          window.localStorage.setItem('portfolio:last-known-good', JSON.stringify(nextData));
+        } catch {
+          /* Content still works when browser storage is full or blocked. */
+        }
       })
       .catch(() => {
         // Keep the last successfully fetched response; never replace it with unrelated demo data.

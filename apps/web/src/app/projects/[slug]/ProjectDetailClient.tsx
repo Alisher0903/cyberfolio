@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { projectDetails } from '@/data/project-details';
 import { useProjectDetailAnimations } from '@/features/projects/hooks/useProjectDetailAnimations';
 import type { Project } from '@/types/project';
 import type { ProjectDetail } from '@/types/project-detail';
@@ -22,7 +21,7 @@ export default function ProjectDetailClient({
   next,
   detail: remoteDetail,
 }: ProjectDetailClientProps) {
-  const detail = remoteDetail ?? projectDetails[project.slug] ?? null;
+  const detail = remoteDetail ?? null;
   const { heroRef, contentRef } = useProjectDetailAnimations(project.slug);
 
   return (
@@ -120,7 +119,7 @@ export default function ProjectDetailClient({
                 <span className="h-2.5 w-2.5 rounded-full bg-danger" />
                 <span className="h-2.5 w-2.5 rounded-full bg-warning" />
                 <span className="h-2.5 w-2.5 rounded-full bg-accent" />
-                <span className="ml-3 font-mono text-xs text-text-dim">project.metrics</span>
+                <span className="ml-3 font-mono text-xs text-text-dim">Project overview</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {project.metrics.map((metric) => (

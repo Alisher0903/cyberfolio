@@ -366,7 +366,7 @@ a:focus-visible {
   html,
   body {
     width: 210mm;
-    height: 297mm;
+    min-height: 297mm;
     margin: 0 !important;
     padding: 0 !important;
     background: transparent !important;
@@ -379,12 +379,12 @@ a:focus-visible {
   }
   #print-root {
     display: block !important;
-    position: fixed !important;
+    position: static !important;
     top: 0;
     left: 0;
     width: 210mm;
-    height: 297mm;
-    overflow: hidden;
+    height: auto;
+    overflow: visible;
     z-index: 99999;
   }
 
@@ -400,11 +400,11 @@ a:focus-visible {
     border: none !important;
     width: 210mm !important;
     min-height: 297mm !important;
-    max-height: 297mm !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 16mm 14mm !important;
     page-break-after: avoid;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   @page {

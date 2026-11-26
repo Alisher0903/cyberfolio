@@ -1,3 +1,7 @@
+const supabaseOrigin = new URL(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kxwuqulepsuwnlvygfij.supabase.co',
+).origin;
+const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL || 'https://api.alisherdev.uz').origin;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -11,8 +15,8 @@ const nextConfig = {
       "object-src 'none'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://kxwuqulepsuwnlvygfij.supabase.co",
-      "connect-src 'self' https://api.alisherdev.uz https://kxwuqulepsuwnlvygfij.supabase.co wss://kxwuqulepsuwnlvygfij.supabase.co",
+      `img-src 'self' data: blob: ${supabaseOrigin}`,
+      `connect-src 'self' ${apiOrigin} ${supabaseOrigin} ${supabaseOrigin.replace('https:', 'wss:').replace('http:', 'ws:')}`,
       'upgrade-insecure-requests',
     ].join('; ');
 

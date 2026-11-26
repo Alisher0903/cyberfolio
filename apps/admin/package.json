@@ -13,7 +13,7 @@
   "dependencies": {
     "@alisherdev/shared": "workspace:*",
     "@supabase/supabase-js": "^2.110.7",
-    "next": "15.5.22",
+    "next": "15.5.29",
     "react": "^18",
     "react-dom": "^18",
     "sharp": "^0.35.3"

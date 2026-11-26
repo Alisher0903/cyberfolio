@@ -11,6 +11,7 @@ export function useResumePdfExport(data: ResumeData) {
     setExporting(true);
     const printRoot = document.createElement('div');
     printRoot.id = 'print-root';
+    printRoot.style.display = 'none';
     printRoot.setAttribute('aria-hidden', 'true');
 
     const printableResume = preview.cloneNode(true) as HTMLElement;
@@ -24,6 +25,7 @@ export function useResumePdfExport(data: ResumeData) {
     document.title = `${(data.name || 'Resume').replace(/[^a-z0-9_-]+/gi, '_')}_Resume`;
 
     const cleanup = () => {
+      window.removeEventListener('afterprint', cleanup);
       printRoot.remove();
       document.title = previousTitle;
       setExporting(false);
@@ -32,9 +34,6 @@ export function useResumePdfExport(data: ResumeData) {
     window.addEventListener('afterprint', cleanup, { once: true });
     requestAnimationFrame(() => {
       window.print();
-      window.setTimeout(() => {
-        if (document.body.contains(printRoot)) cleanup();
-      }, 1000);
     });
   }, [data.name]);
 

@@ -13,7 +13,13 @@ export default function PageProgressBar() {
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const anchor = (event.target as HTMLElement | null)?.closest?.('a');
-      if (!anchor || anchor.target === '_blank' || event.metaKey || event.ctrlKey || event.shiftKey) {
+      if (
+        !anchor ||
+        anchor.target === '_blank' ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey
+      ) {
         return;
       }
 

@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { projects } from '@/data/projects';
 import { siteConfig } from '@/config/site';
 import ProjectDetailClient from './ProjectDetailClient';
 import { getPortfolioProject, getPortfolioProjects } from '@/features/portfolio/portfolio-api';
@@ -8,8 +7,11 @@ import { getPortfolioProject, getPortfolioProjects } from '@/features/portfolio/
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+  return (await getPortfolioProjects()).map((p) => ({ slug: p.slug }));
 }
+
+export const dynamicParams = true;
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -56,11 +58,6 @@ export default async function ProjectDetailPage({ params }: Props) {
   const prev = allProjects[currentIndex - 1] ?? null;
   const next = allProjects[currentIndex + 1] ?? null;
   return (
-    <ProjectDetailClient
-      project={result.project}
-      detail={result.detail}
-      prev={prev}
-      next={next}
-    />
+    <ProjectDetailClient project={result.project} detail={result.detail} prev={prev} next={next} />
   );
 }

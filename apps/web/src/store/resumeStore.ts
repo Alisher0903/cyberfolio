@@ -278,6 +278,7 @@ export const useResumeStore = create<ResumeStore>()(
     {
       name: 'portfolio-resume-v2',
       version: 3,
+      migrate: (persisted) => persisted as ResumeStore,
       merge: (persisted, current) => {
         const saved = persisted as Partial<ResumeStore> | undefined;
         return {

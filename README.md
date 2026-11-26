@@ -15,19 +15,19 @@ A modern, high-performance portfolio website built with Next.js, TypeScript, Rea
 
 ## Tech Stack
 
-- **Framework**: Next.js 14.2
+- **Framework**: Next.js 15.5 (web/admin), Hono (API)
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS 3 + CSS3
 - **Animations**: GSAP 3 + Lenis (smooth scrolling)
 - **State Management**: Zustand 4
 - **Components**: React 18
-- **Document Export**: html2canvas + jsPDF
+- **Document Export**: Native browser print-to-PDF with selectable text and links
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ (LTS recommended)
+- Node.js 22 (matching CI)
 - pnpm 10+ (or npm/yarn)
 
 ### Installation
@@ -63,13 +63,12 @@ The application will be available at `http://localhost:3000`
 
 - `pnpm dev` - Start development server
 - `pnpm build` - Build for production
-- `pnpm start` - Start production server
+- `pnpm --filter @alisherdev/web start` - Start the production web server
 - `pnpm lint` - Run ESLint to check code quality
-- `pnpm lint:fix` - Fix ESLint issues automatically
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check code formatting
 - `pnpm type-check` - Run TypeScript type checking
-- `pnpm validate` - Run all validation tasks (format, lint, type-check)
+- `pnpm validate` - Run format, lint, types, tests and production builds for all apps
 
 ## Project Structure
 

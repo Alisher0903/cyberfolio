@@ -13,7 +13,9 @@ export default function SettingsManager() {
   useEffect(() => {
     adminApi.settings().then((items) => {
       setSettings(items);
-      setDrafts(Object.fromEntries(items.map((item) => [item.key, JSON.stringify(item.value, null, 2)])));
+      setDrafts(
+        Object.fromEntries(items.map((item) => [item.key, JSON.stringify(item.value, null, 2)])),
+      );
     });
   }, []);
 
@@ -41,18 +43,54 @@ export default function SettingsManager() {
 
   return (
     <section className="content-card">
-      <div className="section-heading"><div><p className="eyebrow">GLOBAL CONTENT</p><h2>Site settings</h2><p className="section-copy">Hero, contact and global presentation values.</p></div></div>
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">GLOBAL CONTENT</p>
+          <h2>Site settings</h2>
+          <p className="section-copy">Hero, contact and global presentation values.</p>
+        </div>
+      </div>
       {message && <div className="notice module-error">{message}</div>}
       <div className="settings-grid">
         <article>
-          <header><strong>Security</strong></header>
-          <label><span>New admin password</span><input type="password" autoComplete="new-password" minLength={12} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 12 characters" /></label>
-          <button className="primary-button" disabled={password.length < 12} onClick={changePassword}>Change password</button>
+          <header>
+            <strong>Security</strong>
+          </header>
+          <label>
+            <span>New admin password</span>
+            <input
+              type="password"
+              autoComplete="new-password"
+              minLength={12}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="At least 12 characters"
+            />
+          </label>
+          <button
+            className="primary-button"
+            disabled={password.length < 12}
+            onClick={changePassword}
+          >
+            Change password
+          </button>
         </article>
         {settings.map((setting) => (
           <article key={setting.key}>
-            <header><strong>{setting.key}</strong><button className="primary-button compact" onClick={() => save(setting.key)}>Save</button></header>
-            <textarea rows={12} value={drafts[setting.key] ?? ''} onChange={(event) => setDrafts((current) => ({ ...current, [setting.key]: event.target.value }))} spellCheck={false} />
+            <header>
+              <strong>{setting.key}</strong>
+              <button className="primary-button compact" onClick={() => save(setting.key)}>
+                Save
+              </button>
+            </header>
+            <textarea
+              rows={12}
+              value={drafts[setting.key] ?? ''}
+              onChange={(event) =>
+                setDrafts((current) => ({ ...current, [setting.key]: event.target.value }))
+              }
+              spellCheck={false}
+            />
           </article>
         ))}
       </div>

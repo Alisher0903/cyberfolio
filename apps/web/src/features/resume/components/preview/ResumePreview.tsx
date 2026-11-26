@@ -8,8 +8,13 @@ interface Props {
 }
 
 function normalizeLink(value: string, scheme = 'https://') {
-  if (/^[a-z][a-z\d+.-]*:/i.test(value)) return value;
-  return `${scheme}${value}`;
+  const candidate = /^[a-z][a-z\d+.-]*:/i.test(value) ? value : `${scheme}${value}`;
+  try {
+    const url = new URL(candidate);
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export default function ResumePreview({ data, scale = 1, forExport = false }: Props) {

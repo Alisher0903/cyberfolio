@@ -1,3 +1,7 @@
+const supabaseOrigin = new URL(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kxwuqulepsuwnlvygfij.supabase.co',
+).origin;
+const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL || 'https://api.alisherdev.uz').origin;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -13,7 +17,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'kxwuqulepsuwnlvygfij.supabase.co',
+        hostname: new URL(supabaseOrigin).hostname,
         pathname: '/storage/v1/object/public/portfolio/**',
       },
     ],
@@ -30,8 +34,8 @@ const nextConfig = {
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://kxwuqulepsuwnlvygfij.supabase.co",
-      "connect-src 'self' https://api.alisherdev.uz",
+      `img-src 'self' data: blob: ${supabaseOrigin}`,
+      `connect-src 'self' ${apiOrigin}`,
       'upgrade-insecure-requests',
     ].join('; ');
 

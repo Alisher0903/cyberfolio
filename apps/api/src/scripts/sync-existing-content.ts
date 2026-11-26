@@ -38,7 +38,9 @@ const { data: syncedProjects, error: projectsError } = await client
   .select('id,slug');
 assertNoError(projectsError, 'projects sync');
 
-const projectIdBySlug = new Map((syncedProjects ?? []).map((project) => [project.slug, project.id]));
+const projectIdBySlug = new Map(
+  (syncedProjects ?? []).map((project) => [project.slug, project.id]),
+);
 const detailRows = Object.entries(projectDetails).map(([slug, detail]) => ({
   project_id: projectIdBySlug.get(slug),
   challenge: detail.challenge,
@@ -58,7 +60,10 @@ if (detailRows.some((detail) => !detail.project_id)) {
 const { error: detailsError } = await client.from('project_details').upsert(detailRows);
 assertNoError(detailsError, 'project details sync');
 
-const { error: experienceDeleteError } = await client.from('experiences').delete().neq('id', crypto.randomUUID());
+const { error: experienceDeleteError } = await client
+  .from('experiences')
+  .delete()
+  .neq('id', crypto.randomUUID());
 assertNoError(experienceDeleteError, 'old experiences cleanup');
 const { error: experienceInsertError } = await client.from('experiences').insert(
   experience.map((item, index) => ({
@@ -82,13 +87,44 @@ const { error: skillsError } = await client.from('skill_categories').upsert(
 );
 assertNoError(skillsError, 'skills sync');
 
-const { error: socialsDeleteError } = await client.from('social_links').delete().neq('id', crypto.randomUUID());
+const { error: socialsDeleteError } = await client
+  .from('social_links')
+  .delete()
+  .neq('id', crypto.randomUUID());
 assertNoError(socialsDeleteError, 'old social links cleanup');
 const { error: socialsInsertError } = await client.from('social_links').insert([
-  { label: 'GitHub', handle: '@Alisher0903', href: siteConfig.github, color: '#E8F4FD', status: 'published', sort_order: 0 },
-  { label: 'LinkedIn', handle: 'in/alisher-sodiqov', href: siteConfig.linkedin, color: '#0A66C2', status: 'published', sort_order: 1 },
-  { label: 'Twitter', handle: '@ascyber777', href: siteConfig.twitter, color: '#1DA1F2', status: 'published', sort_order: 2 },
-  { label: 'Email', handle: siteConfig.email, href: `mailto:${siteConfig.email}`, color: '#00FF87', status: 'published', sort_order: 3 },
+  {
+    label: 'GitHub',
+    handle: '@Alisher0903',
+    href: siteConfig.github,
+    color: '#E8F4FD',
+    status: 'published',
+    sort_order: 0,
+  },
+  {
+    label: 'LinkedIn',
+    handle: 'in/alisher-sodiqov',
+    href: siteConfig.linkedin,
+    color: '#0A66C2',
+    status: 'published',
+    sort_order: 1,
+  },
+  {
+    label: 'Twitter',
+    handle: '@ascyber777',
+    href: siteConfig.twitter,
+    color: '#1DA1F2',
+    status: 'published',
+    sort_order: 2,
+  },
+  {
+    label: 'Email',
+    handle: siteConfig.email,
+    href: `mailto:${siteConfig.email}`,
+    color: '#00FF87',
+    status: 'published',
+    sort_order: 3,
+  },
 ]);
 assertNoError(socialsInsertError, 'social links sync');
 
@@ -107,7 +143,8 @@ const { error: settingsError } = await client.from('site_settings').upsert([
       titleAccent: 'Secure &',
       titleLine3: 'Modern',
       titleLine3Accent: 'Web Apps.',
-      description: 'Frontend Engineer specializing in Next.js, React and TypeScript. Currently expanding into Cybersecurity through hands-on labs and Hack The Box.',
+      description:
+        'Frontend Engineer specializing in Next.js, React and TypeScript. Currently expanding into Cybersecurity through hands-on labs and Hack The Box.',
       stat1Value: '2+',
       stat1Label: 'Years Experience',
       stat2Value: '15+',
@@ -125,7 +162,8 @@ const { error: settingsError } = await client.from('site_settings').upsert([
     value: {
       headingPrefix: "Let's build something",
       headingAccent: 'worth hacking.',
-      description: 'Open to full-time roles, freelance projects, and security consulting. I respond to every message — usually within a few hours.',
+      description:
+        'Open to full-time roles, freelance projects, and security consulting. I respond to every message — usually within a few hours.',
       email: siteConfig.email,
       location: 'Tashkent, Uzbekistan',
     },

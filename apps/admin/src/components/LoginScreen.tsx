@@ -58,7 +58,9 @@ export default function LoginScreen() {
         <button className="primary-button" disabled={loading || !isSupabaseConfigured}>
           {loading ? 'Authenticating…' : 'Enter dashboard →'}
         </button>
-        <p className="secure-note"><i /> Protected by Supabase Auth + RLS</p>
+        <p className="secure-note">
+          <i /> Protected by Supabase Auth + RLS
+        </p>
       </form>
     </main>
   );
