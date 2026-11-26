@@ -84,6 +84,7 @@ jobs:
         with:
           name: build
           path: apps/*/.next/*manifest*.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 1
 
