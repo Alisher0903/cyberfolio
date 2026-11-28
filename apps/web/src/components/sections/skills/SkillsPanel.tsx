@@ -1,5 +1,6 @@
-import { skillCategoryMeta } from './skills.config';
+import { skillCategoryLabel, skillCategoryMetaFor } from './skills.config';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export function SkillsPanel({
   skills,
@@ -8,8 +9,9 @@ export function SkillsPanel({
   skills: Record<string, readonly string[]>;
   category: string;
 }) {
-  const meta =
-    skillCategoryMeta[category as keyof typeof skillCategoryMeta] ?? skillCategoryMeta.Other;
+  const { t } = useI18n();
+  const meta = skillCategoryMetaFor(category);
+  const label = skillCategoryLabel(category, t);
 
   return (
     <div
@@ -17,6 +19,7 @@ export function SkillsPanel({
       key={category}
       role="tabpanel"
       aria-labelledby={`skills-tab-${category.toLowerCase()}`}
+      aria-label={t('skills.panelAria', { category: label })}
       className="grid overflow-hidden rounded-2xl border border-border bg-surface lg:grid-cols-[280px_1fr]"
     >
       <div className="relative overflow-hidden border-b border-border p-7 md:p-8 lg:border-b-0 lg:border-r">
@@ -28,13 +31,13 @@ export function SkillsPanel({
           aria-hidden="true"
         />
         <p className={cn('mb-5 font-mono text-[10px] uppercase tracking-[0.18em]', meta.textClass)}>
-          {meta.eyebrow}
+          {t(meta.eyebrowKey)}
         </p>
         <div className={cn('mb-6 font-mono text-4xl font-bold', meta.textClass)} aria-hidden="true">
           {meta.code}
         </div>
-        <h3 className="mb-3 font-display text-2xl font-bold text-text-primary">{category}</h3>
-        <p className="text-sm leading-relaxed text-text-secondary">{meta.description}</p>
+        <h3 className="mb-3 font-display text-2xl font-bold text-text-primary">{label}</h3>
+        <p className="text-sm leading-relaxed text-text-secondary">{t(meta.descriptionKey)}</p>
       </div>
 
       <ul className="grid list-none sm:grid-cols-2 xl:grid-cols-3">

@@ -111,12 +111,18 @@ app.get('/portfolio', async (context) => {
     projects.error ?? experiences.error ?? skills.error ?? socials.error ?? settings.error;
   if (error) return context.json({ error: 'Could not load portfolio content' }, 500);
 
+  const settingMap = Object.fromEntries(
+    (settings.data ?? []).map((item) => [item.key, item.value]),
+  );
+
   return context.json({
     projects: projects.data,
     experiences: experiences.data,
     skills: skills.data,
     socials: socials.data,
-    settings: Object.fromEntries((settings.data ?? []).map((item) => [item.key, item.value])),
+    settings: settingMap,
+    // Per-locale overrides authored in the admin panel (site_settings key `translations`).
+    translations: settingMap.translations ?? null,
   });
 });
 
@@ -131,7 +137,14 @@ app.get('/projects/:slug', async (context) => {
 
   if (error) return context.json({ error: 'Could not load project' }, 500);
   if (!project) return context.json({ error: 'Project not found' }, 404);
-  return context.json(project);
+
+  const { data: translations } = await client
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'translations')
+    .maybeSingle();
+
+  return context.json({ ...project, translations: translations?.value ?? null });
 });
 
 app.post('/contact', async (context) => {

@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export default function ToTopButton() {
+  const { t } = useI18n();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -26,8 +28,8 @@ export default function ToTopButton() {
         boxShadow: isVisible ? '0 0 24px rgba(0,255,135,0.12)' : 'none',
         backdropFilter: 'blur(12px)',
       }}
-      aria-label="Scroll to top"
-      title="Back to top"
+      aria-label={t('common.scrollToTop')}
+      title={t('common.backToTop')}
       tabIndex={isVisible ? 0 : -1}
     >
       ↑

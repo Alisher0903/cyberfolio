@@ -5,7 +5,7 @@ import { siteConfig } from '@/config/site';
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const projects = await getPortfolioProjects();
+  const projects = await getPortfolioProjects('en');
 
   const projectPages = projects.map((project) => ({
     url: `${siteConfig.url}/projects/${project.slug}`,

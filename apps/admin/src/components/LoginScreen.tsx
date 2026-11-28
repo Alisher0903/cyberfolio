@@ -2,8 +2,11 @@
 
 import { FormEvent, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export default function LoginScreen() {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,17 +27,18 @@ export default function LoginScreen() {
       <div className="grid-glow" />
       <form className="login-card" onSubmit={submit}>
         <div className="brand-mark">&gt;_</div>
-        <p className="eyebrow">SECURE CONTROL PLANE</p>
-        <h1>Welcome back.</h1>
-        <p className="muted">Authenticate to manage the public portfolio.</p>
+        <div className="login-locale">
+          <LanguageSwitcher />
+        </div>
+        <p className="eyebrow">{t('admin.login.eyebrow')}</p>
+        <h1>{t('admin.login.title')}</h1>
+        <p className="muted">{t('admin.login.subtitle')}</p>
 
-        {!isSupabaseConfigured && (
-          <div className="notice">Supabase environment variables are not configured.</div>
-        )}
+        {!isSupabaseConfigured && <div className="notice">{t('admin.login.notConfigured')}</div>}
         {error && <div className="error">{error}</div>}
 
         <label>
-          <span>Email address</span>
+          <span>{t('admin.login.email')}</span>
           <input
             type="email"
             autoComplete="email"
@@ -45,7 +49,7 @@ export default function LoginScreen() {
           />
         </label>
         <label>
-          <span>Password</span>
+          <span>{t('admin.login.password')}</span>
           <input
             type="password"
             autoComplete="current-password"
@@ -56,10 +60,10 @@ export default function LoginScreen() {
           />
         </label>
         <button className="primary-button" disabled={loading || !isSupabaseConfigured}>
-          {loading ? 'Authenticating…' : 'Enter dashboard →'}
+          {loading ? t('admin.login.authenticating') : t('admin.login.enter')}
         </button>
         <p className="secure-note">
-          <i /> Protected by Supabase Auth + RLS
+          <i /> {t('admin.login.secured')}
         </p>
       </form>
     </main>

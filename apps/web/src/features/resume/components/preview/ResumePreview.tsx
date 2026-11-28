@@ -1,5 +1,6 @@
 'use client';
 import { ResumeData, themeColors } from '@/store/resumeStore';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   data: ResumeData;
@@ -18,6 +19,7 @@ function normalizeLink(value: string, scheme = 'https://') {
 }
 
 export default function ResumePreview({ data, scale = 1, forExport = false }: Props) {
+  const { t } = useI18n();
   const theme = themeColors[data.colorTheme];
   const isMin = data.layoutStyle === 'minimal';
   const isTerm = data.layoutStyle === 'terminal';
@@ -240,7 +242,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
         <div>
           {/* Work Experience */}
           {data.work.length > 0 && (
-            <Section title="Experience">
+            <Section title={t('resume.preview.experience')}>
               {data.work.map((w) => (
                 <div key={w.id} style={{ marginBottom: '1rem' }}>
                   <div
@@ -311,7 +313,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
 
           {/* Projects */}
           {data.projects.length > 0 && (
-            <Section title="Projects">
+            <Section title={t('resume.preview.projects')}>
               {data.projects.map((p) => (
                 <div key={p.id} style={{ marginBottom: '0.8rem' }}>
                   <div
@@ -363,7 +365,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
 
           {/* Training and short courses */}
           {data.trainings.length > 0 && (
-            <Section title="Training">
+            <Section title={t('resume.preview.training')}>
               {data.trainings.map((training) => (
                 <div key={training.id} style={{ marginBottom: '0.8rem' }}>
                   <div
@@ -414,7 +416,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
         <div>
           {/* Skills */}
           {data.skillGroups.length > 0 && (
-            <Section title="Skills">
+            <Section title={t('resume.preview.skills')}>
               {data.skillGroups.map((sg) => (
                 <div key={sg.id} style={{ marginBottom: '0.7rem' }}>
                   {sg.category && (
@@ -471,7 +473,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
 
           {/* Languages */}
           {data.languages.length > 0 && (
-            <Section title="Languages">
+            <Section title={t('resume.preview.languages')}>
               {data.languages.map((item) => (
                 <div
                   key={item.id}
@@ -511,7 +513,7 @@ export default function ResumePreview({ data, scale = 1, forExport = false }: Pr
 
           {/* Education */}
           {data.education.length > 0 && (
-            <Section title="Education">
+            <Section title={t('resume.preview.education')}>
               {data.education.map((e) => (
                 <div key={e.id} style={{ marginBottom: '0.8rem' }}>
                   <strong

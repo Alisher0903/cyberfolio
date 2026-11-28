@@ -6,10 +6,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
 import { SkillTabs } from './skills/SkillTabs';
 import { SkillsPanel } from './skills/SkillsPanel';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
 export default function Skills() {
+  const { t } = useI18n();
   const { skills } = usePortfolioData();
   const sectionRef = useRef<HTMLElement>(null);
   const [activeCategory, setActiveCategory] = useState('Frontend');
@@ -22,6 +24,7 @@ export default function Skills() {
   }, [activeCategory, categories, skills]);
 
   useEffect(() => {
+    if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.skills-content',
@@ -37,7 +40,7 @@ export default function Skills() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [categories.length]);
 
   if (categories.length === 0) return null;
 
@@ -45,20 +48,17 @@ export default function Skills() {
     <section id="skills" ref={sectionRef} className="bg-bg py-16 md:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-16">
         <div className="mb-10 flex items-center gap-4 md:mb-16">
-          <p className="font-mono text-xs text-accent">04 / Skills</p>
+          <p className="font-mono text-xs text-accent">04 / {t('skills.label')}</p>
           <div className="h-px flex-1 bg-border" />
         </div>
 
         <div className="skills-content">
           <div className="mb-10 max-w-3xl">
             <h2 className="mb-6 font-display text-4xl font-bold text-text-primary lg:text-5xl">
-              Tools I use to turn ideas into{' '}
-              <span className="gradient-text">working products.</span>
+              {t('skills.titlePrefix')}{' '}
+              <span className="gradient-text">{t('skills.titleAccent')}</span>
             </h2>
-            <p className="text-lg leading-relaxed text-text-secondary">
-              A practical toolkit built through real projects — grouped by where each skill creates
-              the most value.
-            </p>
+            <p className="text-lg leading-relaxed text-text-secondary">{t('skills.description')}</p>
           </div>
 
           <SkillTabs skills={skills} active={activeCategory} onChange={setActiveCategory} />

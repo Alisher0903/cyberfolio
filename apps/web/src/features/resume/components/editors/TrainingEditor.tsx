@@ -1,44 +1,46 @@
 import { useResumeStore } from '@/store/resumeStore';
 import { AddButton, EditorCard } from '../ui/EditorControls';
 import { EditorField } from '../ui/EditorField';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export function TrainingEditor() {
+  const { t } = useI18n();
   const { data, updateTraining, addTraining, removeTraining } = useResumeStore();
 
   return (
     <section aria-labelledby="training-heading">
       <h2 id="training-heading" className="sr-only">
-        Training and courses
+        {t('resume.heading.training')}
       </h2>
       {data.trainings.map((training) => (
         <EditorCard key={training.id} onRemove={() => removeTraining(training.id)}>
           <EditorField
-            label="Course / Program"
+            label={t('resume.field.course')}
             value={training.course}
             onChange={(course) => updateTraining(training.id, { course })}
             placeholder="Frontend Development"
           />
           <EditorField
-            label="Training Center / Provider"
+            label={t('resume.field.provider')}
             value={training.provider}
             onChange={(provider) => updateTraining(training.id, { provider })}
             placeholder="Sfera Academy"
           />
           <EditorField
-            label="Period"
+            label={t('resume.field.period')}
             value={training.period}
             onChange={(period) => updateTraining(training.id, { period })}
             placeholder="Jan 2023 – Jul 2023"
           />
           <EditorField
-            label="Credential / Link (optional)"
+            label={t('resume.field.credential')}
             value={training.credential || ''}
             onChange={(credential) => updateTraining(training.id, { credential })}
-            placeholder="Certificate ID or URL"
+            placeholder={t('resume.ph.credential')}
           />
         </EditorCard>
       ))}
-      <AddButton onClick={addTraining}>Add Training</AddButton>
+      <AddButton onClick={addTraining}>{t('resume.addTraining')}</AddButton>
     </section>
   );
 }

@@ -1,10 +1,19 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  localizeExperience,
+  localizeProject,
+  localizeSettings,
+  localizeSocial,
+  type TranslationStore,
+} from '@alisherdev/shared';
 import type { Project } from '@/types/project';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 import { getProjectImageUrl } from './project-image';
 
 interface ExperienceItem {
+  id?: string;
   role: string;
   company: string;
   period: string;
@@ -13,6 +22,7 @@ interface ExperienceItem {
 }
 
 export interface SocialItem {
+  id?: string;
   label: string;
   handle: string;
   href: string;
@@ -25,6 +35,7 @@ interface PortfolioData {
   skills: Record<string, readonly string[]>;
   socials: SocialItem[];
   settings: Record<string, Record<string, unknown>>;
+  translations: TranslationStore | null;
   isRemote: boolean;
 }
 
@@ -52,6 +63,7 @@ interface ApiPortfolio {
   skills: Array<{ name: string; skills: string[] }>;
   socials: SocialItem[];
   settings: Record<string, Record<string, unknown>>;
+  translations?: TranslationStore | null;
 }
 
 const fallbackSocials: SocialItem[] = [
@@ -82,12 +94,41 @@ const initialData: PortfolioData = {
   skills: {},
   socials: fallbackSocials,
   settings: {},
+  translations: null,
   isRemote: false,
 };
 
 const PortfolioContext = createContext<PortfolioData>(initialData);
 
+/** Applies the locale overrides to the authored CMS content. */
+function localizeData(
+  data: PortfolioData,
+  locale: ReturnType<typeof useI18n>['locale'],
+): PortfolioData {
+  const store = data.translations;
+  if (!store) return data;
+  return {
+    ...data,
+    projects: data.projects.map((project) =>
+      localizeProject(project, store.projects?.[project.slug], locale),
+    ),
+    experience: data.experience.map((item) =>
+      localizeExperience(item, item.id ? store.experiences?.[item.id] : undefined, locale),
+    ),
+    socials: data.socials.map((item) =>
+      localizeSocial(item, item.id ? store.socials?.[item.id] : undefined, locale),
+    ),
+    settings: Object.fromEntries(
+      Object.entries(data.settings).map(([key, value]) => [
+        key,
+        localizeSettings(value, store.settings?.[key], locale),
+      ]),
+    ),
+  };
+}
+
 export function PortfolioDataProvider({ children }: { children: React.ReactNode }) {
+  const { locale } = useI18n();
   const [data, setData] = useState<PortfolioData>(initialData);
 
   useEffect(() => {
@@ -146,6 +187,7 @@ export function PortfolioDataProvider({ children }: { children: React.ReactNode 
           skills,
           socials: remote.socials.length ? remote.socials : fallbackSocials,
           settings: remote.settings ?? {},
+          translations: remote.translations ?? null,
           isRemote: true,
         };
         if (controller.signal.aborted) return;
@@ -163,7 +205,7 @@ export function PortfolioDataProvider({ children }: { children: React.ReactNode 
     return () => controller.abort();
   }, []);
 
-  const value = useMemo(() => data, [data]);
+  const value = useMemo(() => localizeData(data, locale), [data, locale]);
   return <PortfolioContext.Provider value={value}>{children}</PortfolioContext.Provider>;
 }
 

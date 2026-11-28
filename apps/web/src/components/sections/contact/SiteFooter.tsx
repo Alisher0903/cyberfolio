@@ -1,26 +1,35 @@
+'use client';
+
 import { siteConfig } from '@/config/site';
 import { socialLinks } from './contact.config';
 import { SocialIcon } from './SocialIcon';
 import type { SocialItem } from '@/features/portfolio/PortfolioDataProvider';
 import type { SocialIconName } from './contact.config';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 const iconForLabel = (label: string): SocialIconName => {
   const normalized = label.toLowerCase();
   if (normalized.includes('linkedin')) return 'linkedin';
-  if (normalized.includes('telegram')) return 'telegram';
+  if (normalized.includes('telegram') || normalized.includes('t.me/')) return 'telegram';
   if (normalized.includes('instagram')) return 'instagram';
-  if (normalized.includes('twitter') || normalized === 'x') return 'twitter';
+  if (normalized.includes('twitter') || normalized.includes('x.com/') || normalized === 'x')
+    return 'twitter';
   if (normalized.includes('mail')) return 'email';
   if (normalized.includes('phone') || normalized.includes('tel')) return 'phone';
   return 'github';
 };
 
 export function SiteFooter({ socials }: { socials?: SocialItem[] }) {
+  const { t } = useI18n();
   const links = socials?.length
     ? socials.map((item) => ({
         label: item.label,
         href: item.href,
-        icon: iconForLabel(item.label),
+        icon: item.href.startsWith('mailto:')
+          ? ('email' as const)
+          : item.href.startsWith('tel:')
+            ? ('phone' as const)
+            : iconForLabel(item.href),
         external: !item.href.startsWith('mailto:') && !item.href.startsWith('tel:'),
       }))
     : socialLinks;
@@ -29,10 +38,10 @@ export function SiteFooter({ socials }: { socials?: SocialItem[] }) {
       <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
         <p className="text-center font-mono text-xs text-text-dim md:text-left">
           © {new Date().getFullYear()} {siteConfig.name}
-          <span className="hidden sm:inline"> · Tashkent, Uzbekistan</span>
+          <span className="hidden sm:inline"> · {t('footer.location')}</span>
         </p>
 
-        <nav aria-label="Social and contact links">
+        <nav aria-label={t('footer.linksAria')}>
           <ul className="flex list-none flex-wrap items-center justify-center gap-2">
             {links.map((link) => (
               <li key={link.label}>
@@ -53,7 +62,7 @@ export function SiteFooter({ socials }: { socials?: SocialItem[] }) {
 
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 animate-pulse rounded-full bg-accent" aria-hidden="true" />
-          <span className="font-mono text-xs text-text-dim">Available for work</span>
+          <span className="font-mono text-xs text-text-dim">{t('footer.available')}</span>
         </div>
       </div>
     </footer>

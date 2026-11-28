@@ -1,21 +1,26 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { siteConfig } from '@/config/site';
+import { getRequestLocale } from '@/lib/i18n/server';
 import ProjectDetailClient from './ProjectDetailClient';
 import { getPortfolioProject, getPortfolioProjects } from '@/features/portfolio/portfolio-api';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return (await getPortfolioProjects()).map((p) => ({ slug: p.slug }));
+  return (await getPortfolioProjects('en')).map((p) => ({ slug: p.slug }));
 }
 
 export const dynamicParams = true;
+// The layout resolves the locale from a cookie, so this route must render per
+// request; project data itself is still cached for 60s at the fetch level.
+export const dynamic = 'force-dynamic';
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const result = await getPortfolioProject(slug);
+  const locale = await getRequestLocale();
+  const result = await getPortfolioProject(slug, locale);
   const project = result?.project;
   if (!project) return {};
   return {
@@ -49,9 +54,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
+  const locale = await getRequestLocale();
   const [result, allProjects] = await Promise.all([
-    getPortfolioProject(slug),
-    getPortfolioProjects(),
+    getPortfolioProject(slug, locale),
+    getPortfolioProjects(locale),
   ]);
   if (!result) notFound();
   const currentIndex = allProjects.findIndex((p) => p.slug === slug);

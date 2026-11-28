@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export type MobileResumeView = 'editor' | 'preview';
 
@@ -8,6 +9,8 @@ interface ResumeViewToggleProps {
 }
 
 export function ResumeViewToggle({ value, onChange }: ResumeViewToggleProps) {
+  const { t } = useI18n();
+
   return (
     <div className="grid grid-cols-2 border-b border-border bg-surface p-1 md:hidden">
       {(['editor', 'preview'] as const).map((view) => (
@@ -20,7 +23,7 @@ export function ResumeViewToggle({ value, onChange }: ResumeViewToggleProps) {
             value === view && 'bg-accent/10 text-accent',
           )}
         >
-          {view === 'editor' ? '✎ Editor' : '◫ Preview'}
+          {view === 'editor' ? `✎ ${t('resume.editor')}` : `◫ ${t('resume.preview')}`}
         </button>
       ))}
     </div>

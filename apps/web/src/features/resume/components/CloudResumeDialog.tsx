@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useResumeStore, type ResumeData } from '@/store/resumeStore';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 interface CloudResumeDialogProps {
   onClose: () => void;
@@ -10,6 +11,7 @@ interface CloudResumeDialogProps {
 type Status = { kind: 'idle' | 'working' | 'success' | 'error'; message: string };
 
 export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
+  const { t, formatDate } = useI18n();
   const { data, update } = useResumeStore();
   const [key, setKey] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -17,23 +19,49 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
   const [status, setStatus] = useState<Status>({ kind: 'idle', message: '' });
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   async function request(path: string, method: 'POST' | 'DELETE', body: object) {
-    if (!apiUrl) throw new Error('Cloud storage is not configured');
-    if (key.length < 8) throw new Error('Recovery key must be at least 8 characters');
+    if (!apiUrl) throw new Error(t('resume.cloud.notConfigured'));
+    if (key.length < 8) throw new Error(t('resume.cloud.keyTooShort'));
     const response = await fetch(`${apiUrl}${path}`, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-    if (!response.ok) throw new Error(payload?.error ?? 'Request failed');
+    if (!response.ok)
+      throw new Error(
+        t(
+          response.status === 404
+            ? 'resume.cloud.notFound'
+            : response.status === 409
+              ? path.endsWith('/save')
+                ? 'resume.cloud.keyInUse'
+                : 'resume.cloud.loadFirst'
+              : response.status === 429
+                ? 'resume.cloud.rateLimited'
+                : 'resume.cloud.requestFailed',
+        ),
+      );
     return payload;
   }
 
   async function run(action: 'save' | 'load' | 'delete') {
     setStatus({
       kind: 'working',
-      message: `${action === 'save' ? 'Saving' : action === 'load' ? 'Loading' : 'Deleting'}…`,
+      message:
+        action === 'save'
+          ? t('resume.cloud.saving')
+          : action === 'load'
+            ? t('resume.cloud.loading')
+            : t('resume.cloud.deleting'),
     });
     try {
       if (action === 'save') {
@@ -41,7 +69,7 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
           updateToken?: string;
         };
         setUpdateToken(payload.updateToken);
-        setStatus({ kind: 'success', message: 'Resume saved to cloud.' });
+        setStatus({ kind: 'success', message: t('resume.cloud.saved') });
       } else if (action === 'load') {
         const payload = (await request('/resumes/load', 'POST', { key })) as {
           data: ResumeData;
@@ -52,16 +80,16 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
         setUpdateToken(payload.updateToken);
         setStatus({
           kind: 'success',
-          message: `Resume restored · ${new Date(payload.updated_at).toLocaleString()}`,
+          message: t('resume.cloud.restored', { date: formatDate(payload.updated_at) }),
         });
       } else {
         await request('/resumes', 'DELETE', { key, updateToken });
-        setStatus({ kind: 'success', message: 'Cloud copy deleted.' });
+        setStatus({ kind: 'success', message: t('resume.cloud.deleted') });
       }
     } catch (error) {
       setStatus({
         kind: 'error',
-        message: error instanceof Error ? error.message : 'Request failed',
+        message: error instanceof Error ? error.message : t('resume.cloud.requestFailed'),
       });
     }
   }
@@ -74,17 +102,18 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
       aria-labelledby="cloud-resume-title"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+      <div className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-2xl">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="mb-1 font-mono text-[10px] text-accent">CLOUD BACKUP</p>
+            <p className="mb-1 font-mono text-[10px] text-accent">{t('resume.cloud.eyebrow')}</p>
             <h2 id="cloud-resume-title" className="font-display text-xl font-bold">
-              Save or restore resume
+              {t('resume.cloud.title')}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label={t('common.close')}
             className="grid h-8 w-8 place-items-center rounded-md border border-border text-text-dim"
           >
             ×
@@ -94,7 +123,7 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
           className="mb-2 block font-mono text-[10px] uppercase tracking-wider text-text-dim"
           htmlFor="resume-recovery-key"
         >
-          Recovery key
+          {t('resume.cloud.keyLabel')}
         </label>
         <div className="flex gap-2">
           <input
@@ -105,7 +134,7 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
               setKey(event.target.value);
               setUpdateToken(undefined);
             }}
-            placeholder="At least 8 characters"
+            placeholder={t('resume.cloud.keyPlaceholder')}
             autoComplete="off"
             className="min-w-0 flex-1 rounded-md border border-border bg-bg px-3 py-2.5 text-sm outline-none focus:border-accent/40"
           />
@@ -114,11 +143,11 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
             onClick={() => setShowKey((value) => !value)}
             className="rounded-md border border-border px-3 font-mono text-[10px] text-text-secondary"
           >
-            {showKey ? 'Hide' : 'Show'}
+            {showKey ? t('resume.cloud.hide') : t('resume.cloud.show')}
           </button>
         </div>
         <p className="mt-2 font-mono text-[10px] leading-relaxed text-text-dim">
-          Use the same key later to restore or update this resume.
+          {t('resume.cloud.keyHint')}
         </p>
         {status.message && (
           <p
@@ -135,7 +164,7 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
             onClick={() => run('load')}
             className="rounded-md border border-cyan/30 px-3 py-2.5 font-mono text-xs text-cyan disabled:opacity-50"
           >
-            ↑ Load
+            {t('resume.cloud.load')}
           </button>
           <button
             type="button"
@@ -143,17 +172,15 @@ export function CloudResumeDialog({ onClose }: CloudResumeDialogProps) {
             onClick={() => run('save')}
             className="rounded-md bg-accent px-3 py-2.5 font-mono text-xs font-semibold text-bg disabled:opacity-50"
           >
-            ↓ Save
+            {t('resume.cloud.save')}
           </button>
           <button
             type="button"
             disabled={status.kind === 'working'}
-            onClick={() =>
-              window.confirm('Delete the cloud copy for this recovery key?') && run('delete')
-            }
+            onClick={() => window.confirm(t('resume.cloud.confirmDelete')) && run('delete')}
             className="col-span-2 rounded-md border border-danger/25 px-3 py-2 font-mono text-[11px] text-danger disabled:opacity-50"
           >
-            Delete cloud copy
+            {t('resume.cloud.deleteCopy')}
           </button>
         </div>
       </div>

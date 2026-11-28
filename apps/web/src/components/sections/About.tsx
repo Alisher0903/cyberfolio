@@ -2,13 +2,20 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { aboutCards } from '@/data/home';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
 export default function About() {
+  const { t } = useI18n();
   const { experience } = usePortfolioData();
+  const aboutCards = [
+    { icon: '📍', label: t('about.cardLocationLabel'), value: t('about.cardLocationValue') },
+    { icon: '💻', label: t('about.cardStackLabel'), value: t('about.cardStackValue') },
+    { icon: '📚', label: t('about.cardSecurityLabel'), value: t('about.cardSecurityValue') },
+    { icon: '🎯', label: t('about.cardFocusLabel'), value: t('about.cardFocusValue') },
+  ];
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -53,37 +60,36 @@ export default function About() {
     <section
       id="about"
       ref={sectionRef}
-      className="py-16 md:py-32 grid-bg"
+      className="overflow-hidden py-16 md:py-32 grid-bg"
       style={{ backgroundColor: '#050A0E' }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
         {/* Section label */}
         <div className="flex items-center gap-4 mb-10 md:mb-16">
           <p className="font-mono text-xs" style={{ color: '#00FF87' }}>
-            02 / About
+            02 / {t('about.label')}
           </p>
           <div className="flex-1 h-px" style={{ backgroundColor: '#0E2030' }} />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 mb-24">
+        <div className="grid lg:grid-cols-2 gap-16 mb-24 [&>*]:min-w-0">
           {/* Left */}
           <div className="about-left">
             <h2
               className="font-display text-4xl lg:text-5xl font-bold mb-6"
               style={{ color: '#E8F4FD' }}
             >
-              Frontend Engineer <span className="gradient-text">with a Security-First Mindset</span>
+              {t('about.titlePrefix')}{' '}
+              <span className="gradient-text">{t('about.titleAccent')}</span>
             </h2>
             <p className="text-lg leading-relaxed mb-3" style={{ color: '#7FA8C4' }}>
-              Frontend Engineer specializing in Next.js, React, and TypeScript, focused on building
-              fast, scalable, and maintainable web applications.
+              {t('about.p1')}
+            </p>
+            <p className="text-lg leading-relaxed mb-3" style={{ color: '#7FA8C4' }}>
+              {t('about.p2')}
             </p>
             <p className="text-lg leading-relaxed mb-8" style={{ color: '#7FA8C4' }}>
-              Alongside frontend engineering, I have hands-on experience in web security,
-              penetration testing, Linux environments, and vulnerability assessment through
-              practical security labs and real-world attack scenarios. <br />I combine development
-              experience with a security-first approach to build applications that are not only fast
-              and scalable, but also designed with security in mind.
+              {t('about.p3')}
             </p>
 
             {/* Key facts */}
@@ -177,7 +183,7 @@ export default function About() {
         {/* Experience timeline */}
         <div>
           <h3 className="font-display text-2xl font-bold mb-8" style={{ color: '#E8F4FD' }}>
-            Experience
+            {t('about.experience')}
           </h3>
           <div className="relative">
             {/* Timeline line */}

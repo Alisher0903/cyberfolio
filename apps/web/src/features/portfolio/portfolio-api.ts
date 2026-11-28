@@ -1,3 +1,12 @@
+import type { Locale } from '@alisherdev/shared';
+import {
+  localizeDetail,
+  localizeProject,
+  type DetailTranslation,
+  type ProjectTranslation,
+  type TranslationEntry,
+  type TranslationStore,
+} from '@alisherdev/shared';
 import type { Project } from '@/types/project';
 import type { ProjectDetail } from '@/types/project-detail';
 import { getProjectImageUrl } from './project-image';
@@ -19,6 +28,7 @@ interface ApiProject {
   featured: boolean;
   cover_image_path?: string | null;
   project_details?: ApiDetail | ApiDetail[] | null;
+  translations?: TranslationStore | null;
 }
 
 interface ApiDetail {
@@ -32,8 +42,8 @@ interface ApiDetail {
   code_snippet: string;
 }
 
-function mapProject(project: ApiProject, id: number): Project {
-  return {
+function mapProject(project: ApiProject, id: number, locale: Locale): Project {
+  const base: Project = {
     id,
     slug: project.slug,
     title: project.title,
@@ -50,9 +60,13 @@ function mapProject(project: ApiProject, id: number): Project {
     featured: project.featured,
     coverImage: getProjectImageUrl(project.cover_image_path),
   };
+  const entry = project.translations?.projects?.[project.slug] as
+    | TranslationEntry<ProjectTranslation>
+    | undefined;
+  return localizeProject(base, entry, locale);
 }
 
-export async function getPortfolioProjects(): Promise<Project[]> {
+export async function getPortfolioProjects(locale: Locale): Promise<Project[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) return [];
   try {
@@ -61,14 +75,19 @@ export async function getPortfolioProjects(): Promise<Project[]> {
       signal: globalThis.AbortSignal.timeout(10000),
     });
     if (!response.ok) return [];
-    const body = (await response.json()) as { projects: ApiProject[] };
-    return body.projects.map((project, index) => mapProject(project, index + 1));
+    const body = (await response.json()) as {
+      projects: ApiProject[];
+      translations?: TranslationStore;
+    };
+    return body.projects.map((project, index) =>
+      mapProject({ ...project, translations: body.translations }, index + 1, locale),
+    );
   } catch {
     return [];
   }
 }
 
-export async function getPortfolioProject(slug: string) {
+export async function getPortfolioProject(slug: string, locale: Locale) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (apiUrl) {
     try {
@@ -81,7 +100,7 @@ export async function getPortfolioProject(slug: string) {
         const rawDetail = Array.isArray(remote.project_details)
           ? remote.project_details[0]
           : remote.project_details;
-        const detail: ProjectDetail | null = rawDetail
+        const baseDetail: ProjectDetail | null = rawDetail
           ? {
               challenge: rawDetail.challenge,
               solution: rawDetail.solution,
@@ -93,7 +112,13 @@ export async function getPortfolioProject(slug: string) {
               codeSnippet: rawDetail.code_snippet,
             }
           : null;
-        return { project: mapProject(remote, 1), detail };
+        const detailEntry = remote.translations?.details?.[remote.slug] as
+          | TranslationEntry<DetailTranslation>
+          | undefined;
+        return {
+          project: mapProject(remote, 1, locale),
+          detail: baseDetail ? localizeDetail(baseDetail, detailEntry, locale) : null,
+        };
       }
     } catch {
       // Do not substitute another project's content when the API is unavailable.

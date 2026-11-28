@@ -12,6 +12,7 @@ import { WorkEditor } from './editors/WorkEditor';
 import { TrainingEditor } from './editors/TrainingEditor';
 import { LanguagesEditor } from './editors/LanguagesEditor';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 const editors: Record<ResumeTab, React.ComponentType> = {
   personal: PersonalEditor,
@@ -25,17 +26,18 @@ const editors: Record<ResumeTab, React.ComponentType> = {
 };
 
 export function ResumeEditor() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<ResumeTab>('personal');
   const ActiveEditor = editors[activeTab];
 
   return (
     <aside
       className="flex h-full min-h-0 flex-col overflow-hidden border-r border-border bg-surface"
-      aria-label="Resume editor"
+      aria-label={t('resume.editorAria')}
     >
       <nav
         className="resume-side-scroll flex overflow-x-auto border-b border-border p-2"
-        aria-label="Editor sections"
+        aria-label={t('resume.sectionsAria')}
       >
         {resumeTabs.map((tab) => (
           <button
@@ -49,7 +51,7 @@ export function ResumeEditor() {
             )}
           >
             <span aria-hidden="true">{tab.icon}</span>
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </nav>

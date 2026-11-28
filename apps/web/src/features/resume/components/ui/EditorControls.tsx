@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export function AddButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
@@ -13,13 +14,15 @@ export function AddButton({ onClick, children }: { onClick: () => void; children
 }
 
 export function EditorCard({ onRemove, children }: { onRemove: () => void; children: ReactNode }) {
+  const { t } = useI18n();
+
   return (
     <div className="relative mb-3 rounded-lg border border-border bg-bg p-3">
       <button
         type="button"
         onClick={onRemove}
         className="absolute right-2 top-2 px-1.5 py-0.5 font-mono text-[10px] text-danger"
-        aria-label="Remove item"
+        aria-label={t('common.removeItem')}
       >
         ✕
       </button>

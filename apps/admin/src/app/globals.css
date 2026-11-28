@@ -291,10 +291,22 @@ input[type='file'] {
 }
 .topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 32px;
+}
+.topbar > div:first-child {
+  flex: 1 1 230px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 .topbar h1 {
   margin: 0;
@@ -861,4 +873,122 @@ input[type='file'] {
     grid-column: 1/-1;
     justify-content: flex-start;
   }
+}
+
+/* ── Language switcher (4 locales: uz, uz-cyrl, ru, en) ───────────────── */
+.locale-switch {
+  position: relative;
+  display: inline-flex;
+}
+.locale-switch .locale-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 9px 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.locale-switch .locale-trigger:hover,
+.locale-switch .locale-trigger[aria-expanded='true'] {
+  color: var(--green);
+  border-color: rgba(0, 255, 135, 0.4);
+}
+.locale-switch .chevron {
+  font-size: 8px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.locale-switch .locale-trigger[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+.locale-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  width: 178px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.85);
+}
+.locale-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.locale-menu button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.locale-menu button.active {
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--green);
+}
+.locale-menu .code {
+  width: 24px;
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.locale-menu .check {
+  margin-left: auto;
+  color: var(--green);
+}
+.tr-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.tr-tabs button {
+  min-width: 44px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.tr-tabs button.active {
+  border-color: rgba(0, 255, 135, 0.45);
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--green);
+}
+
+.login-locale {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }

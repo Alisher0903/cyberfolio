@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import type { MessageKey } from '@alisherdev/shared';
 import { adminApi, type AdminProject, type ProjectDetailInput, type ProjectInput } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import LoginScreen from './LoginScreen';
@@ -10,6 +11,8 @@ import CollectionManager from './CollectionManager';
 import MessagesManager from './MessagesManager';
 import SettingsManager from './SettingsManager';
 import ResumesManager from './ResumesManager';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 type Section =
   | 'overview'
@@ -22,6 +25,7 @@ type Section =
   | 'settings';
 
 export default function AdminShell() {
+  const { t } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [projects, setProjects] = useState<AdminProject[]>([]);
@@ -36,11 +40,11 @@ export default function AdminShell() {
     try {
       setProjects(await adminApi.projects());
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not load projects');
+      setError(caught instanceof Error ? caught.message : t('admin.couldNotLoadProjects'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     supabase?.auth.getSession().then(({ data }) => {
@@ -63,21 +67,22 @@ export default function AdminShell() {
     );
   if (!session) return <LoginScreen />;
 
-  async function saveProject(input: ProjectInput, detail: ProjectDetailInput) {
-    const project = selected
-      ? await adminApi.updateProject(selected.id, input)
+  async function saveProject(input: ProjectInput, _detail: ProjectDetailInput, savedId?: string) {
+    const id = savedId ?? selected?.id;
+    const project = id
+      ? await adminApi.updateProject(id, input)
       : await adminApi.createProject(input);
-    await adminApi.saveProjectDetail(project.id, detail);
-    setSelected(undefined);
     await loadProjects();
+    return project;
   }
 
   async function removeProject(project: AdminProject) {
-    if (!window.confirm(`Delete “${project.title}”? This cannot be undone.`)) return;
+    if (!window.confirm(t('admin.deleteProjectConfirm', { title: project.title }))) return;
     await adminApi.deleteProject(project.id);
     await loadProjects();
   }
 
+  const sectionLabel = (key: Section) => t(`admin.nav.${key}` as MessageKey);
   const published = projects.filter((project) => project.status === 'published').length;
   const featured = projects.filter((project) => project.featured).length;
 
@@ -87,8 +92,8 @@ export default function AdminShell() {
         <div className="sidebar-brand">
           <span>&gt;_</span>
           <div>
-            <strong>AlisherDev</strong>
-            <small>CONTROL PLANE</small>
+            <strong>{t('admin.brand')}</strong>
+            <small>{t('admin.brandSub')}</small>
           </div>
         </div>
         <nav>
@@ -96,98 +101,99 @@ export default function AdminShell() {
             className={section === 'overview' ? 'active' : ''}
             onClick={() => setSection('overview')}
           >
-            <span>⌂</span> Overview
+            <span>⌂</span> {t('admin.nav.overview')}
           </button>
           <button
             className={section === 'projects' ? 'active' : ''}
             onClick={() => setSection('projects')}
           >
-            <span>◉</span> Projects <b>{projects.length}</b>
+            <span>◉</span> {t('admin.nav.projects')} <b>{projects.length}</b>
           </button>
           <button
             className={section === 'experiences' ? 'active' : ''}
             onClick={() => setSection('experiences')}
           >
-            <span>◇</span> Experience
+            <span>◇</span> {t('admin.nav.experiences')}
           </button>
           <button
             className={section === 'skills' ? 'active' : ''}
             onClick={() => setSection('skills')}
           >
-            <span>◆</span> Skills
+            <span>◆</span> {t('admin.nav.skills')}
           </button>
           <button
             className={section === 'socials' ? 'active' : ''}
             onClick={() => setSection('socials')}
           >
-            <span>↗</span> Social links
+            <span>↗</span> {t('admin.nav.socials')}
           </button>
           <button
             className={section === 'messages' ? 'active' : ''}
             onClick={() => setSection('messages')}
           >
-            <span>✉</span> Messages
+            <span>✉</span> {t('admin.nav.messages')}
           </button>
           <button
             className={section === 'resumes' ? 'active' : ''}
             onClick={() => setSection('resumes')}
           >
-            <span>▤</span> Resumes
+            <span>▤</span> {t('admin.nav.resumes')}
           </button>
           <button
             className={section === 'settings' ? 'active' : ''}
             onClick={() => setSection('settings')}
           >
-            <span>⚙</span> Site settings
+            <span>⚙</span> {t('admin.nav.settings')}
           </button>
         </nav>
         <div className="sidebar-footer">
           <div className="status-dot">
-            <i /> API connected
+            <i /> {t('admin.apiConnected')}
           </div>
-          <button onClick={() => supabase?.auth.signOut()}>Sign out ↗</button>
+          <button onClick={() => supabase?.auth.signOut()}>{t('admin.signOut')}</button>
         </div>
       </aside>
 
       <main className="dashboard">
         <header className="topbar">
           <div>
-            <p className="eyebrow">PORTFOLIO CMS / {section.toUpperCase()}</p>
-            <h1>
-              {section === 'overview'
-                ? 'Good to see you.'
-                : section[0].toUpperCase() + section.slice(1)}
-            </h1>
+            <p className="eyebrow">
+              {t('admin.eyebrow', { section: sectionLabel(section).toUpperCase() })}
+            </p>
+            <h1>{section === 'overview' ? t('admin.greeting') : sectionLabel(section)}</h1>
           </div>
-          {(section === 'overview' || section === 'projects') && (
-            <button className="primary-button compact" onClick={() => setSelected(null)}>
-              + New project
-            </button>
-          )}
+          <div className="topbar-actions">
+            <LanguageSwitcher />
+            {(section === 'overview' || section === 'projects') && (
+              <button className="primary-button compact" onClick={() => setSelected(null)}>
+                {t('admin.newProject')}
+              </button>
+            )}
+          </div>
         </header>
 
         {error && <div className="error">{error}</div>}
         {section === 'overview' && (
           <section className="stats-grid">
             <article>
-              <span>ALL PROJECTS</span>
+              <span>{t('admin.stat.allProjects')}</span>
               <strong>{projects.length.toString().padStart(2, '0')}</strong>
-              <small>Portfolio entries</small>
+              <small>{t('admin.stat.entries')}</small>
             </article>
             <article>
-              <span>PUBLISHED</span>
+              <span>{t('admin.stat.published')}</span>
               <strong className="green">{published.toString().padStart(2, '0')}</strong>
-              <small>Visible to everyone</small>
+              <small>{t('admin.stat.visible')}</small>
             </article>
             <article>
-              <span>FEATURED</span>
+              <span>{t('admin.stat.featured')}</span>
               <strong className="cyan">{featured.toString().padStart(2, '0')}</strong>
-              <small>Homepage highlights</small>
+              <small>{t('admin.stat.highlights')}</small>
             </article>
             <article>
-              <span>SYSTEM</span>
-              <strong className="system-ok">ONLINE</strong>
-              <small>All services operational</small>
+              <span>{t('admin.stat.system')}</span>
+              <strong className="system-ok">{t('admin.stat.online')}</strong>
+              <small>{t('admin.stat.operational')}</small>
             </article>
           </section>
         )}
@@ -196,26 +202,26 @@ export default function AdminShell() {
           <section className="content-card">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">CONTENT</p>
-                <h2>Projects</h2>
+                <p className="eyebrow">{t('admin.content')}</p>
+                <h2>{t('admin.nav.projects')}</h2>
               </div>
               <button className="secondary-button" onClick={loadProjects}>
-                ↻ Refresh
+                ↻ {t('common.refresh')}
               </button>
             </div>
             {loading ? (
               <div className="table-state">
-                <div className="loader" /> Loading content…
+                <div className="loader" /> {t('admin.loadingContent')}
               </div>
             ) : projects.length === 0 ? (
-              <div className="table-state">No projects yet.</div>
+              <div className="table-state">{t('admin.noProjects')}</div>
             ) : (
               <div className="project-table">
                 <div className="table-row table-head">
-                  <span>Project</span>
-                  <span>Category</span>
-                  <span>Year</span>
-                  <span>Status</span>
+                  <span>{t('admin.table.project')}</span>
+                  <span>{t('admin.table.category')}</span>
+                  <span>{t('admin.table.year')}</span>
+                  <span>{t('admin.table.status')}</span>
                   <span />
                 </div>
                 {projects.map((project) => (
@@ -230,12 +236,14 @@ export default function AdminShell() {
                     <span>{project.category || '—'}</span>
                     <span>{project.year || '—'}</span>
                     <span>
-                      <b className={`badge ${project.status}`}>{project.status}</b>
+                      <b className={`badge ${project.status}`}>
+                        {project.status === 'published' ? t('common.published') : t('common.draft')}
+                      </b>
                     </span>
                     <span className="row-actions">
-                      <button onClick={() => setSelected(project)}>Edit</button>
+                      <button onClick={() => setSelected(project)}>{t('common.edit')}</button>
                       <button className="danger-button" onClick={() => removeProject(project)}>
-                        Delete
+                        {t('common.delete')}
                       </button>
                     </span>
                   </div>

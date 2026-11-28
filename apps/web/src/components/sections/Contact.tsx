@@ -2,8 +2,10 @@
 import { useRef, useState } from 'react';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
 import { SiteFooter } from './contact/SiteFooter';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export default function Contact() {
+  const { t } = useI18n();
   const { socials: links, settings } = usePortfolioData();
   const contactSettings = settings.contact ?? {};
   const contactSetting = (key: string, fallback: string) =>
@@ -41,7 +43,7 @@ export default function Contact() {
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
         <div className="flex items-center gap-4 mb-10 md:mb-16">
           <p className="font-mono text-xs" style={{ color: '#00FF87' }}>
-            05 / Contact
+            05 / {t('contact.label')}
           </p>
           <div className="flex-1 h-px" style={{ backgroundColor: '#0E2030' }} />
         </div>
@@ -53,19 +55,19 @@ export default function Contact() {
               className="font-display text-4xl lg:text-5xl font-bold mb-6"
               style={{ color: '#E8F4FD' }}
             >
-              {contactSetting('headingPrefix', "Let's build something")}{' '}
+              {contactSetting('headingPrefix', t('contact.titlePrefix'))}{' '}
               <span className="gradient-text">
-                {contactSetting('headingAccent', 'worth hacking.')}
+                {contactSetting('headingAccent', t('contact.titleAccent'))}
               </span>
             </h2>
             <p className="text-lg leading-relaxed mb-10" style={{ color: '#7FA8C4' }}>
               {typeof contactSettings.description === 'string'
                 ? contactSettings.description
-                : 'Open to full-time roles, freelance projects, and security consulting. I respond to every message — usually within a few hours.'}
+                : t('contact.description')}
             </p>
 
             {/* Links */}
-            <div className="space-y-3">
+            <nav className="space-y-3" aria-label={t('contact.linksAria')}>
               {links.map((link) => (
                 <a
                   key={link.label}
@@ -98,7 +100,7 @@ export default function Contact() {
                   </span>
                 </a>
               ))}
-            </div>
+            </nav>
           </div>
 
           {/* Right: Form */}
@@ -107,7 +109,7 @@ export default function Contact() {
             style={{ backgroundColor: '#0A1219', borderColor: '#0E2030' }}
           >
             <h3 className="font-mono text-sm mb-6" style={{ color: '#00FF87' }}>
-              $ send_message --encrypted
+              {t('contact.sendCommand')}
             </h3>
 
             {status === 'sent' ? (
@@ -122,10 +124,10 @@ export default function Contact() {
                   ✓
                 </div>
                 <p className="font-mono text-lg" style={{ color: '#00FF87' }}>
-                  Message sent!
+                  {t('contact.sentTitle')}
                 </p>
                 <p className="font-mono text-xs text-center" style={{ color: '#3A5568' }}>
-                  I&apos;ll get back to you within 24 hours.
+                  {t('contact.sentNote')}
                 </p>
               </div>
             ) : (
@@ -140,12 +142,12 @@ export default function Contact() {
                     }}
                     role="alert"
                   >
-                    Message could not be sent. Please try again or use email.
+                    {t('contact.error')}
                   </p>
                 )}
                 <div>
                   <label className="block font-mono text-xs mb-2" style={{ color: '#3A5568' }}>
-                    name
+                    {t('contact.name')}
                   </label>
                   <input
                     type="text"
@@ -164,12 +166,12 @@ export default function Contact() {
                     onBlur={(e) => {
                       (e.target as HTMLInputElement).style.borderColor = '#0E2030';
                     }}
-                    placeholder="Alisher Sodiqov"
+                    placeholder={t('contact.namePlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block font-mono text-xs mb-2" style={{ color: '#3A5568' }}>
-                    email
+                    {t('contact.email')}
                   </label>
                   <input
                     type="email"
@@ -188,12 +190,12 @@ export default function Contact() {
                     onBlur={(e) => {
                       (e.target as HTMLInputElement).style.borderColor = '#0E2030';
                     }}
-                    placeholder="hello@company.dev"
+                    placeholder={t('contact.emailPlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block font-mono text-xs mb-2" style={{ color: '#3A5568' }}>
-                    message
+                    {t('contact.message')}
                   </label>
                   <textarea
                     required
@@ -212,7 +214,7 @@ export default function Contact() {
                     onBlur={(e) => {
                       (e.target as HTMLTextAreaElement).style.borderColor = '#0E2030';
                     }}
-                    placeholder="I'd love to work together on..."
+                    placeholder={t('contact.messagePlaceholder')}
                   />
                 </div>
                 <button
@@ -225,7 +227,7 @@ export default function Contact() {
                     opacity: status === 'sending' ? 0.7 : 1,
                   }}
                 >
-                  {status === 'sending' ? 'Encrypting...' : 'Send Message →'}
+                  {status === 'sending' ? t('contact.sending') : t('contact.send')}
                 </button>
               </form>
             )}

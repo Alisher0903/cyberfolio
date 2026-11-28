@@ -1,3 +1,4 @@
+import type { TranslationStore } from '@alisherdev/shared';
 import { supabase } from './supabase';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002/api/v1';
@@ -55,6 +56,16 @@ export const adminApi = {
   deleteItem: (name: CollectionName, id: string) =>
     request<void>(`/admin/${name}/${id}`, { method: 'DELETE' }),
   settings: () => request<SiteSetting[]>('/admin/settings'),
+  translations: async () => {
+    const settings = await request<SiteSetting[]>('/admin/settings');
+    const value = settings.find((item) => item.key === 'translations')?.value;
+    return (value ?? {}) as unknown as TranslationStore;
+  },
+  saveTranslations: (store: TranslationStore) =>
+    request<SiteSetting>('/admin/settings/translations', {
+      method: 'PUT',
+      body: JSON.stringify({ value: store }),
+    }),
   saveSetting: (key: string, value: Record<string, unknown>) =>
     request<SiteSetting>(`/admin/settings/${key}`, {
       method: 'PUT',

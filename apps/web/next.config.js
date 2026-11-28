@@ -6,6 +6,9 @@ const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL || 'https://api.alishe
 const nextConfig = {
   reactStrictMode: true,
 
+  // Shared workspace package (i18n dictionaries, types) is TypeScript source.
+  transpilePackages: ['@alisherdev/shared'],
+
   // Performance optimizations
   compress: true,
 

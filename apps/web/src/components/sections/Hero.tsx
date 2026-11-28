@@ -2,8 +2,10 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export default function Hero() {
+  const { t } = useI18n();
   const { settings, projects } = usePortfolioData();
   const heroSettings = settings.hero ?? {};
   const setting = (key: string, fallback: string) =>
@@ -37,9 +39,7 @@ export default function Hero() {
     { line: '08', code: '};', color: '#E8F4FD' },
   ];
   const heroDescription =
-    typeof heroSettings.description === 'string'
-      ? heroSettings.description
-      : 'Frontend Engineer specializing in Next.js, React and TypeScript. Currently expanding into Cybersecurity through hands-on labs and Hack The Box.';
+    typeof heroSettings.description === 'string' ? heroSettings.description : t('hero.description');
   const containerRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const codeRef = useRef<HTMLDivElement>(null);
@@ -164,6 +164,7 @@ export default function Hero() {
       );
 
     return () => {
+      tl.kill();
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
     };
@@ -199,7 +200,7 @@ export default function Hero() {
       <div className="scanline" />
 
       <div className="relative max-w-7xl mx-auto px-6 py-24 w-full" style={{ zIndex: 1 }}>
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-center [&>*]:min-w-0">
           {/* Left: Text */}
           <div>
             {/* Tag */}
@@ -215,29 +216,35 @@ export default function Hero() {
                 className="w-2 h-2 rounded-full animate-pulse"
                 style={{ backgroundColor: '#00FF87' }}
               />
-              {setting('tagline', 'Frontend • Cybersecurity Learner')}
+              {setting('tagline', t('hero.tagline'))}
             </div>
 
             {/* Headline */}
-            <h1 ref={headlineRef} className="font-display mb-6" style={{ lineHeight: 1.05 }}>
+            <h1
+              ref={headlineRef}
+              className="font-display mb-6 [overflow-wrap:anywhere]"
+              style={{ lineHeight: 1.05 }}
+            >
               <div
                 className="hero-title-1 text-4xl sm:text-5xl lg:text-7xl font-bold mb-2"
                 style={{ color: '#E8F4FD' }}
               >
-                {setting('titleLine1', 'Building Fast,')}
+                {setting('titleLine1', t('hero.titleLine1'))}
               </div>
               <div
                 className="hero-title-2 text-4xl sm:text-5xl lg:text-7xl font-bold gradient-text"
                 style={{ display: 'block' }}
               >
-                {setting('titleAccent', 'Secure &')}
+                {setting('titleAccent', t('hero.titleAccent'))}
               </div>
               <div
                 className="hero-title-1 text-2xl sm:text-4xl lg:text-5xl font-light mt-1"
                 style={{ color: '#7FA8C4' }}
               >
-                {setting('titleLine3', 'Modern')}{' '}
-                <span style={{ color: '#00D4FF' }}>{setting('titleLine3Accent', 'Web Apps.')}</span>
+                {setting('titleLine3', t('hero.titleLine3'))}{' '}
+                <span style={{ color: '#00D4FF' }}>
+                  {setting('titleLine3Accent', t('hero.titleLine3Accent'))}
+                </span>
               </div>
             </h1>
 
@@ -260,7 +267,7 @@ export default function Hero() {
                   }}
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    View Projects
+                    {t('hero.viewProjects')}
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                       →
                     </span>
@@ -286,7 +293,7 @@ export default function Hero() {
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Get in Touch
+                {t('hero.getInTouch')}
               </button>
             </div>
 
@@ -295,13 +302,16 @@ export default function Hero() {
               {[
                 {
                   val: setting('stat1Value', '2+'),
-                  label: setting('stat1Label', 'Years Experience'),
+                  label: setting('stat1Label', t('hero.stat1Label')),
                 },
                 {
                   val: setting('stat2Value', '15+'),
-                  label: setting('stat2Label', 'Projects Built'),
+                  label: setting('stat2Label', t('hero.stat2Label')),
                 },
-                { val: setting('stat3Value', 'HTB'), label: setting('stat3Label', 'Learning') },
+                {
+                  val: setting('stat3Value', 'HTB'),
+                  label: setting('stat3Label', t('hero.stat3Label')),
+                },
               ].map((s) => (
                 <div key={s.label}>
                   <div className="font-display text-2xl font-bold" style={{ color: '#00FF87' }}>
@@ -354,7 +364,9 @@ export default function Hero() {
                     >
                       {l.line}
                     </span>
-                    <span style={{ color: l.color }}>{l.code}</span>
+                    <span className="min-w-0 [overflow-wrap:anywhere]" style={{ color: l.color }}>
+                      {l.code}
+                    </span>
                   </div>
                 ))}
                 <div className="code-line flex gap-4 mt-1">
@@ -392,10 +404,10 @@ export default function Hero() {
                 </div>
                 <div>
                   <div className="font-mono text-xs font-medium" style={{ color: '#00D4FF' }}>
-                    {setting('badge1Title', 'Security-First UI')}
+                    {setting('badge1Title', t('hero.badge1Title'))}
                   </div>
                   <div className="font-mono text-xs" style={{ color: '#3A5568' }}>
-                    {setting('badge1Subtitle', 'Frontend + Cybersecurity')}
+                    {setting('badge1Subtitle', t('hero.badge1Subtitle'))}
                   </div>
                 </div>
               </div>
@@ -410,10 +422,10 @@ export default function Hero() {
               }}
             >
               <div className="font-mono text-xs font-medium" style={{ color: '#FFB800' }}>
-                ◈ {setting('badge2Title', 'Hack The Box')}
+                ◈ {setting('badge2Title', t('hero.badge2Title'))}
               </div>
               <div className="font-mono text-xs" style={{ color: '#3A5568' }}>
-                {setting('badge2Subtitle', 'Active Learner')}
+                {setting('badge2Subtitle', t('hero.badge2Subtitle'))}
               </div>
             </div>
           </div>
@@ -423,7 +435,7 @@ export default function Hero() {
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
         <span className="font-mono text-xs" style={{ color: '#3A5568' }}>
-          scroll
+          {t('hero.scroll')}
         </span>
         <div className="w-px h-12 overflow-hidden" style={{ backgroundColor: '#0E2030' }}>
           <div className="w-px h-6 animate-bounce" style={{ backgroundColor: '#00FF87' }} />

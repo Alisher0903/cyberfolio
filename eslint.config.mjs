@@ -46,6 +46,7 @@ export default [
         // Analytics globals
         gtag: true,
         // DOM elements
+        Node: true,
         HTMLElement: true,
         HTMLDivElement: true,
         HTMLSpanElement: true,

@@ -1,16 +1,16 @@
 export const navLinks = [
-  { label: 'Home', href: '#hero', icon: '⌂' },
-  { label: 'About', href: '#about', icon: '◈' },
-  { label: 'Projects', href: '#projects', icon: '◉' },
-  { label: 'Skills', href: '#skills', icon: '◆' },
-  { label: 'Contact', href: '#contact', icon: '✉' },
+  { id: 'home', href: '#hero', icon: '⌂' },
+  { id: 'about', href: '#about', icon: '◈' },
+  { id: 'projects', href: '#projects', icon: '◉' },
+  { id: 'skills', href: '#skills', icon: '◆' },
+  { id: 'contact', href: '#contact', icon: '✉' },
 ] as const;
 
-export type NavLabel = (typeof navLinks)[number]['label'];
+export type NavId = (typeof navLinks)[number]['id'];
 export type NavLink = (typeof navLinks)[number];
 
 export interface NavbarViewProps {
-  active: NavLabel;
+  active: NavId;
   links: readonly NavLink[];
-  onNavigate: (href: string, label: NavLabel) => void;
+  onNavigate: (href: string, id: NavId) => void;
 }

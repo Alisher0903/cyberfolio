@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { adminApi, type CollectionItem } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 export default function MessagesManager() {
+  const { t, formatDate } = useI18n();
   const [messages, setMessages] = useState<CollectionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const load = useCallback(async () => {
@@ -24,12 +26,12 @@ export default function MessagesManager() {
     <section className="content-card">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">INBOX</p>
-          <h2>Messages</h2>
-          <p className="section-copy">Messages submitted from the public contact form.</p>
+          <p className="eyebrow">{t('admin.messages.eyebrow')}</p>
+          <h2>{t('admin.messages.title')}</h2>
+          <p className="section-copy">{t('admin.messages.subtitle')}</p>
         </div>
         <button className="secondary-button" onClick={load}>
-          ↻ Refresh
+          ↻ {t('common.refresh')}
         </button>
       </div>
       {loading ? (
@@ -49,16 +51,16 @@ export default function MessagesManager() {
                   value={String(message.status)}
                   onChange={(e) => status(message.id, e.target.value)}
                 >
-                  <option value="new">New</option>
-                  <option value="read">Read</option>
-                  <option value="archived">Archived</option>
+                  <option value="new">{t('admin.messages.new')}</option>
+                  <option value="read">{t('admin.messages.read')}</option>
+                  <option value="archived">{t('admin.messages.archived')}</option>
                 </select>
               </header>
               <p>{String(message.message)}</p>
-              <small>{new Date(String(message.created_at)).toLocaleString()}</small>
+              <small>{formatDate(String(message.created_at))}</small>
             </article>
           ))}
-          {!messages.length && <div className="table-state">Inbox is empty.</div>}
+          {!messages.length && <div className="table-state">{t('admin.messages.empty')}</div>}
         </div>
       )}
     </section>

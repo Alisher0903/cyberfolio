@@ -5,22 +5,24 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePortfolioData } from '@/features/portfolio/PortfolioDataProvider';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
 const isExternalUrl = (value?: string) => /^https?:\/\/\S+$/i.test(value ?? '');
 
-const displayUrl = (value: string) => {
-  if (!isExternalUrl(value)) return 'Project preview';
+const displayUrl = (value: string, fallback: string) => {
+  if (!isExternalUrl(value)) return fallback;
   try {
     const url = new URL(value);
     return `${url.hostname}${url.pathname === '/' ? '' : url.pathname}`;
   } catch {
-    return 'Project preview';
+    return fallback;
   }
 };
 
 export default function Projects() {
+  const { t } = useI18n();
   const { projects } = usePortfolioData();
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +83,7 @@ export default function Projects() {
         className="flex h-[100svh] flex-col overflow-hidden pb-20 md:pb-0"
         style={{ backgroundColor: '#050A0E' }}
         role="region"
-        aria-label="Projects showcase"
+        aria-label={t('projects.regionAria')}
         aria-live="polite"
         aria-atomic="true"
       >
@@ -89,13 +91,13 @@ export default function Projects() {
         <div className="px-4 md:px-16 pt-16 md:pt-24 pb-4 flex items-end justify-between flex-shrink-0">
           <div className="projects-heading">
             <p className="font-mono text-xs mb-1" style={{ color: '#00FF87' }}>
-              03 / Projects
+              03 / {t('projects.label')}
             </p>
             <h2
               className="font-display text-3xl md:text-5xl font-bold"
               style={{ color: '#E8F4FD' }}
             >
-              Selected Work
+              {t('projects.heading')}
             </h2>
           </div>
           <div className="font-mono text-right" style={{ color: '#3A5568' }}>
@@ -184,7 +186,7 @@ export default function Projects() {
                     className="px-2 py-1 font-mono text-xs rounded border"
                     style={{ borderColor: '#0E2030', color: '#3A5568', backgroundColor: '#0A1219' }}
                   >
-                    +{(project?.tech.length ?? 0) - 5} more
+                    {t('projects.more', { count: (project?.tech.length ?? 0) - 5 })}
                   </span>
                 )}
               </div>
@@ -210,16 +212,16 @@ export default function Projects() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={`/projects/${project?.slug}`}
-                  aria-label={`View details for ${project?.title}`}
+                  aria-label={t('projects.detailsAria', { title: project?.title ?? '' })}
                   className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded transition-all duration-300"
                   style={{ backgroundColor: project?.color, color: '#050A0E', fontWeight: 600 }}
                 >
-                  Details →
+                  {t('projects.details')}
                 </Link>
                 {isExternalUrl(project.link) && (
                   <a
                     href={project?.link}
-                    aria-label={`Live demo of ${project?.title} (opens in new tab)`}
+                    aria-label={t('projects.liveAria', { title: project?.title ?? '' })}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded border transition-all duration-300"
@@ -235,13 +237,13 @@ export default function Projects() {
                       a.style.color = '#7FA8C4';
                     }}
                   >
-                    Live ↗
+                    {t('projects.live')}
                   </a>
                 )}
                 {isExternalUrl(project.github) && (
                   <a
                     href={project?.github}
-                    aria-label={`GitHub repository for ${project?.title}`}
+                    aria-label={t('projects.githubAria', { title: project?.title ?? '' })}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm rounded border transition-all duration-300"
@@ -257,7 +259,7 @@ export default function Projects() {
                       a.style.color = '#7FA8C4';
                     }}
                   >
-                    GitHub
+                    {t('projects.github')}
                   </a>
                 )}
               </div>
@@ -287,14 +289,14 @@ export default function Projects() {
                     className="ml-2 min-w-0 flex-1 truncate h-6 rounded font-mono text-xs px-3 leading-6"
                     style={{ backgroundColor: '#050A0E', color: '#3A5568' }}
                   >
-                    {displayUrl(project.link)}
+                    {displayUrl(project.link, t('projects.preview'))}
                   </div>
                 </div>
                 {project.coverImage ? (
                   <div className="relative aspect-[16/9] w-full">
                     <Image
                       src={project.coverImage}
-                      alt={`${project.title} project cover`}
+                      alt={t('projects.coverAlt', { title: project.title })}
                       fill
                       sizes="(min-width: 1280px) 50vw, 100vw"
                       className="object-cover"
@@ -351,7 +353,7 @@ export default function Projects() {
                     </div>
                     <div className="rounded-lg p-4" style={{ backgroundColor: '#050A0E' }}>
                       <div className="font-mono text-xs mb-2" style={{ color: '#3A5568' }}>
-                        Activity
+                        {t('projects.activity')}
                       </div>
                       <div className="flex items-end gap-0.5 h-12">
                         {Array.from({ length: 24 }, (_, i) => (
@@ -377,14 +379,14 @@ export default function Projects() {
         <div
           className="flex flex-wrap items-center justify-center gap-2 px-4 pb-4 flex-shrink-0"
           role="tablist"
-          aria-label="Project navigation"
+          aria-label={t('projects.navAria')}
         >
           {projects.map((p, i) => (
             <button
               key={i}
               role="tab"
               aria-selected={i === activeIndex}
-              aria-label={`Go to project ${i + 1}: ${p.title}`}
+              aria-label={t('projects.dotAria', { index: i + 1, title: p.title })}
               onClick={() => {
                 const trigger = triggerRef.current;
                 if (!trigger) return;
@@ -408,7 +410,7 @@ export default function Projects() {
           className="text-center font-mono text-xs pb-3 flex-shrink-0"
           style={{ color: '#3A5568' }}
         >
-          scroll ↓ to navigate
+          {t('projects.scrollHint')}
         </p>
       </div>
     </div>
